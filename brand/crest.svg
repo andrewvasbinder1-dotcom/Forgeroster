@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ForgeRoster shield and anvil">
+  <defs><linearGradient id="metal" x2="1" y2="1"><stop stop-color="#f0d49b"/><stop offset="1" stop-color="#ad7941"/></linearGradient></defs>
+  <path d="M256 45 451 116v153l-33 65-162 132L94 334l-33-65V116z" fill="#21242a" stroke="url(#metal)" stroke-width="16"/>
+  <path d="m256 76 164 60v122l-27 54-137 112-137-112-27-54V136z" fill="#14161a" stroke="#48484a" stroke-width="5"/>
+  <path d="M125 181h262l-63 65-43 8v40l67 35v20H164v-20l67-35v-40h-36l-70-39z" fill="url(#metal)"/>
+  <path d="M155 194h202l-16 15H181z" fill="#f5ddac"/>
+</svg>

@@ -15,7 +15,7 @@ html{font-size:16px}body{overflow-x:hidden}button,input,select{min-height:44px}i
 const gate = document.createElement('dialog');
 gate.id = 'frAuthGate';
 gate.setAttribute('aria-labelledby', 'frAuthTitle');
-gate.innerHTML = `<div id="frAuthCard"><h2 id="frAuthTitle">ForgeRoster account</h2><p id="frAuthIntro"></p>
+gate.innerHTML = `<div id="frAuthCard"><img class="fr-auth-crest" src="./brand/crest.svg" alt=""><h2 id="frAuthTitle">ForgeRoster account</h2><p id="frAuthIntro"></p>
   <form id="frAuthForm"><label for="frEmail">Email</label>
   <input id="frEmail" type="email" autocomplete="email" required placeholder="you@example.com">
   <label id="frPasswordLabel" for="frPassword">Password</label>
