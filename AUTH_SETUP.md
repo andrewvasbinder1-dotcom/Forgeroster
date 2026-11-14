@@ -12,7 +12,17 @@ ForgeRoster is a static GitHub Pages site. Real account registration requires an
 **Important security and data limitations**
 
 - Until configured, the site remains usable in local-only mode and shows a warning.
-- Signing in does **not yet sync rosters to Supabase**. The roster editor currently stores its data in localStorage, which is shared by all people using the same browser profile on that device. Do not treat localStorage as private user data.
+- Cloud syncing requires the SQL migration above. The active roster also has a local browser cache, which is not encrypted; avoid shared devices.
 - Before offering this as a multi-user product, implement a `rosters` table with a `user_id` column, Row Level Security policies restricting CRUD to `auth.uid() = user_id`, and user-scoped CRUD in the client. Verify RLS from two independent accounts.
 - Passwords are handled by Supabase Auth, never stored in the ForgeRoster repository or browser localStorage by ForgeRoster.
 - Wahapedia rules imports and full official validation are separate unfinished work.
+
+## Cloud roster storage (required)
+
+1. Open [Supabase SQL Editor](https://supabase.com/dashboard/project/qzkyhdxauwzqrtqcsfmu/sql/new).
+2. Copy the complete SQL in [`supabase/rosters.sql`](supabase/rosters.sql) and execute it once.
+3. Verify the `public.rosters` table exists and Row Level Security is enabled.
+4. Sign in on ForgeRoster, create an army, add a unit, wait for **Saved to cloud**, then sign in on another device and open the same army.
+5. Test with a second account to confirm the first account's rosters are not visible.
+
+The client supports a cloud library, account-specific create/open/delete, and debounced saves. Changes on another device are loaded when the roster is reopened or the site is reloaded; simultaneous collaborative editing and conflict resolution are not yet implemented. The browser's previous local roster can be imported into a new account from **Import device roster** if shown. Avoid editing the same roster on two devices at once.
