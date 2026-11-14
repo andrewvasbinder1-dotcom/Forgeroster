@@ -1,37 +1,8 @@
-name: Sync 11e Munitorum Points
+name: Retired BSData sync
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '23 17 * * *'
-  push:
-    paths:
-      - '.github/workflows/sync-mfm.yml'
-permissions:
-  contents: write
 jobs:
-  sync:
+  retired:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Download reviewed MFM dataset
-        run: |
-          mkdir -p data
-          curl --fail --location --retry 3 --silent --show-error \
-            'https://github.com/BSData/wh40k-11e-mfm/releases/latest/download/all.json' -o data/mfm.json
-          python3 - <<'PY'
-          import json
-          with open('data/mfm.json') as f: data=json.load(f)
-          assert data['schemaVersion']==2
-          assert len(data['factions'])>20
-          assert sum(len(x.get('units',[])) for x in data['factions'])>500
-          print('MFM',data['meta']['version'],'factions',len(data['factions']))
-          PY
-      - name: Commit reviewed points snapshot
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add data/mfm.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'Sync reviewed 11e MFM points and detachments'
-            git push
-          fi
+      - run: echo 'BSData sync retired following November 2026 takedown. No download or publication performed.'
