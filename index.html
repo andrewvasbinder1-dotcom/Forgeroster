@@ -17,4 +17,4 @@ $('reset').onclick=()=>{if(!confirm('Clear the current roster?'))return;roster={
 $('export').onclick=()=>{let a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(roster,null,2)],{type:'application/json'}));a.href=url;a.download='forgeroster.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 $('import').onchange=async e=>{try{let data=JSON.parse(await e.target.files[0].text());if(!Array.isArray(data.units))throw Error('Missing units');roster={name:String(data.name||'Imported roster'),faction:String(data.faction||''),limit:Number(data.limit)||2000,units:data.units.map(u=>({name:String(u.name||'Unknown'),points:Math.max(0,Number(u.points)||0)}))};save();render()}catch(err){alert('Invalid roster file: '+err.message)}};
 render();
-</script><script src="./factions.js" defer></script></body></html>
+</script><script src="./factions.js" defer></script><script src="./catalogue.js" defer></script></body></html>
