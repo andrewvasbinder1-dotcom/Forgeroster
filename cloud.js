@@ -45,7 +45,12 @@ function showConflict(message) {
   $('frUseCloud').hidden = false;
 }
 
+window.frCombatRosterLibrary = () => account?.loaded
+  ? account.items.filter(row => row.id !== account.active).map(row => [row.id, fromRow(row)])
+  : [];
+
 function draw(state) {
+  document.dispatchEvent(new Event('fr-cloud-rosters-changed'));
   const list = $('frCloudList');
   list.replaceChildren();
   $('frImportLegacy').hidden = !state.loaded || !storage.readGuest();

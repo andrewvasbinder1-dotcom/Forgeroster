@@ -36,7 +36,7 @@ function profileTable(rows, columns) {
   return wrapper;
 }
 
-function showUnitProfile(unit) {
+function showUnitProfile(unit, faction) {
   const detail = document.createElement('details');
   detail.className = 'fr-unit-profile';
   detail.append(node('summary', 'Unit profile'));
@@ -60,6 +60,11 @@ function showUnitProfile(unit) {
     }
     if (unit.abilityNames?.length) detail.append(node('p', 'Abilities · ' + unit.abilityNames.join(' · ')));
     if (unit.leads?.length) detail.append(node('p', 'Eligible bodyguards · ' + unit.leads.join(' · ')));
+    for (const weapon of unit.weapons || []) {
+      const calculate = node('button', 'Calculate ' + weapon.name);
+      calculate.onclick = () => window.frOpenCombat({ faction, name: unit.name, weapon: weapon.name });
+      detail.append(calculate);
+    }
     if (unit.datasheetSource) {
       const url = new URL(unit.datasheetSource);
       if (url.protocol === 'https:') {
@@ -94,7 +99,7 @@ function drawCatalogue(r, f) {
     const title = node('div', '');
     title.append(node('strong', unit.name + (unit.legends ? ' · Legends' : '')));
     if (unit.stats?.length || unit.weapons?.length || unit.abilityNames?.length || unit.leads?.length) {
-      title.append(showUnitProfile(unit));
+      title.append(showUnitProfile(unit, r.faction));
     }
     const controls = node('div', '');
     controls.className = 'fr-catalogue-controls';
@@ -175,6 +180,12 @@ function drawRoster(roster, faction, sheets, result) {
     const attachment = armySetup.attachmentControl(roster, faction, sheets, index);
     if (attachment) details.append(attachment);
     renderEquipment(details, roster, entry, catalogue, sheet);
+    if (catalogue?.weapons?.length) {
+      const calculate = node('button', 'Combat calculator');
+      calculate.setAttribute('aria-label', 'Calculate combat for ' + entry.name);
+      calculate.onclick = () => window.frOpenCombat({ faction: roster.faction, name: entry.name, id: entry.id });
+      details.append(calculate);
+    }
 
     const remove = node('button', 'Remove');
     remove.setAttribute('aria-label', 'Remove ' + entry.name);

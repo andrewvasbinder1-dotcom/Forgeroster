@@ -1,0 +1,88 @@
+#frCombat {
+  --combat-surface: #151e30;
+  --combat-background: #0e1727;
+  --combat-border: #4b5f7c;
+  --combat-text: #f0f3f9;
+  --combat-muted: #b8c6d9;
+  --combat-accent: #a9c8ff;
+  max-width: 1150px;
+  margin: 12px auto;
+  color: var(--combat-text);
+  background: var(--combat-background);
+  border-color: var(--combat-border);
+  overflow-wrap: anywhere;
+}
+
+#frCombat.combat-light {
+  color-scheme: light;
+  --combat-surface: #fff;
+  --combat-background: #edf2f9;
+  --combat-border: #8293a8;
+  --combat-text: #132746;
+  --combat-muted: #405570;
+  --combat-accent: #164581;
+}
+
+#frCombat header, #frCombat section {
+  color: var(--combat-text);
+  background: var(--combat-surface);
+  border-color: var(--combat-border);
+  border-radius: 12px;
+}
+
+#frCombat header { padding: 10px 0; background: transparent; }
+#frCombat h2, #frCombat h3, #frCombat h4 { margin: 0 0 8px; }
+#frCombat a, #frCombat summary { color: var(--combat-accent); }
+#frCombat small, #frCombat .combat-note { color: var(--combat-muted); }
+#frCombat label { margin: 0; }
+#frCombat label > :is(input, select) { display: block; width: 100%; margin-top: 4px; }
+#frCombat :is(input, select, button) {
+  color: var(--combat-text);
+  background: var(--combat-background);
+  border-color: var(--combat-border);
+  min-width: 0;
+  max-width: 100%;
+}
+#frCombat [aria-pressed="true"] { border: 2px solid var(--combat-accent); }
+#frCombat > :is(section, details), #frCombat .combat-grid { margin: 12px 0; }
+#frCombat details { padding: 8px 0; }
+#frCombat summary { cursor: pointer; padding: 8px 0; min-height: 44px; }
+#frCombat .combat-grid, #frCombat .combat-fields, #frCombat .combat-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+#frCombat .combat-stats { grid-template-columns: repeat(auto-fit, minmax(min(135px, 100%), 1fr)); }
+#frCombat .combat-stats div { padding: 8px; background: var(--combat-background); border-radius: 8px; }
+#frCombat dt { font-size: .85rem; color: var(--combat-muted); }
+#frCombat dd { margin: 4px 0 0; font-size: 1.15rem; font-weight: 700; }
+#frCombat .combat-actions, #frCombat .combat-dice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+  margin: 8px 0;
+}
+#frCombat label.combat-check { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 44px; }
+#frCombat label.combat-check input, #frCombat .combat-die input { width: 20px; height: 20px; margin: 0; }
+#frCombat .combat-options { max-height: 200px; overflow: auto; padding: 0 8px; }
+#frCombat .combat-tag { display: flex; flex-wrap: wrap; gap: 4px; }
+#frCombat .combat-tag input { width: 6rem; }
+#frCombat .combat-target-result { padding-top: 12px; border-top: 1px solid var(--combat-border); }
+#frCombat .combat-bar { display: grid; grid-template-columns: 3ch 1fr 8ch; gap: 8px; align-items: center; margin: 3px 0; }
+#frCombat .combat-bar span:nth-child(2) { width: var(--chance); height: .75rem; background: var(--combat-accent); border-radius: 5px; }
+#frCombat label.combat-die { display: grid; place-items: center; min-width: 44px; min-height: 44px; padding: 5px; border: 2px solid; border-radius: 8px; }
+#frCombat .combat-die.d0 { border-color: #d47a72; }
+#frCombat .combat-die.d1 { border-color: #54a583; }
+#frCombat .combat-die.d2 { border-color: #d5ab49; }
+
+body[data-fr-view="combat"] :is(#frWizard, #frRules, #frRuleLibrary, #frSources, #frLinked, #frLibrary, main) {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  #frCombat { margin: 8px; padding: 10px; }
+  #frCombat section { padding: 10px; }
+  #frCombat .combat-grid { grid-template-columns: minmax(0, 1fr); }
+  #frCombat .combat-actions button { flex: 1 1 auto; }
+}

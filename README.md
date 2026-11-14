@@ -23,6 +23,7 @@ require network access.
 
 - See [data sources and coverage](DATA_SOURCES.md) for points, profiles and edition updates.
 - See [army validation](docs/VALIDATION.md) for implemented checks and metadata.
+- See [combat calculator](docs/COMBAT.md) for rules coverage, probability assumptions and account setup.
 - See [rule packs](RULES_PACKS.md) for bundled coverage, source versions and the import schema.
 - See [Supabase setup](AUTH_SETUP.md) for authentication configuration, migration,
   cloud sync behavior and verification.
