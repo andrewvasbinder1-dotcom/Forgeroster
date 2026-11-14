@@ -32,7 +32,7 @@ when a publication changes an effect.
   complete bearer and replacement mappings. Confirm the actual loadout manually.
   The selected unit's faction, detachment, and attached-unit rules are available
   for reference. Apply supported numeric effects manually when conditions are met.
-- Mixed save and wound allocation groups, Precision overflow, FNP restricted to
+- Mixed save and wound allocation groups can be entered manually in defender allocation order and use labeled seeded simulation for probabilities. Select a visible Character group to resolve Precision, with ordinary allocation resuming when it dies. FNP restricted to
   particular damage sources, one-off damage cancellation, and bespoke or unverified
   faction effects require manual handling. The calculator does not decide movement,
   visibility, and positioning from tabletop geometry.

@@ -21,3 +21,19 @@ Run `node scripts/verify-points.mjs points.csv` for the existing comparison chec
 ## Current gaps
 
 Only installed rules packs with structured data can enforce detailed composition and equipment checks. Faction-wide legal loadouts, allied-unit permissions, full row-by-row official comparison and remaining original rules summaries require primary material. No hosted access was available to run privileged SQL or end-to-end authenticated tests. The dashboard supports bug triage, private attachments, aggregate counts and report update auditing. Account suspension and role management, rules publishing and rollback UI, error telemetry, announcements, feature flags and self-service account deletion are outstanding. Screenshots are capped and re-encoded by the UI. The database checks the PNG signature, declared header and byte length. The schema does not provide antivirus scanning.
+
+## Migration dependency order and verification
+
+| SQL file | Dependency and scope |
+| --- | --- |
+| rosters.sql | Existing hosted authentication schema; preserves roster rows and installs the revision trigger |
+| combat_scenarios.sql | Hosted authentication schema; separate scenario table and owner policies |
+| operations.sql | Rosters for admin counts; creates private admin, audit and outbox tables |
+| admin_directory.sql | Operations and rosters; exposes read-only admin RPCs |
+| email_worker.sql | Operations outbox table; reserves delivery RPC access for the service role |
+
+First record the existing policies and row counts and retain an independently
+restorable backup. Verify the migration sequence and rollback on staging.
+After deploying, compare owner-scoped reads and writes using two real sessions;
+verify the PostgreSQL revision trigger rather than relying on client timestamps.
+The public Pages bundle does not contain these migrations and cannot apply them.

@@ -35,8 +35,8 @@
 #frCombat a, #frCombat summary { color: var(--combat-accent); }
 #frCombat small, #frCombat .combat-note { color: var(--combat-muted); }
 #frCombat label { margin: 0; }
-#frCombat label > :is(input, select) { display: block; width: 100%; margin-top: 4px; }
-#frCombat :is(input, select, button) {
+#frCombat label > :is(input, select, textarea) { display: block; width: 100%; margin-top: 4px; }
+#frCombat :is(input, select, button, textarea) {
   color: var(--combat-text);
   background: var(--combat-background);
   border-color: var(--combat-border);
@@ -86,3 +86,5 @@ body[data-fr-view="combat"] :is(#frWizard, #frRules, #frRuleLibrary, #frSources,
   #frCombat .combat-grid { grid-template-columns: minmax(0, 1fr); }
   #frCombat .combat-actions button { flex: 1 1 auto; }
 }
+
+#frCombat textarea { min-height: 88px; padding: 8px; font: inherit; resize: vertical; }
