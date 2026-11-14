@@ -174,6 +174,10 @@ function drawRoster(roster, faction, sheets, result) {
       size.onchange = () => {
         if (!size.value) return;
         const choice = choices[Number(size.value)];
+        if (entry.models !== choice.models && entry.combatLoadout) {
+          if (!confirm('Changing unit size clears the recorded combat loadout. Continue?')) { size.value = String(current); return; }
+          delete entry.combatLoadout;
+        }
         entry.models = choice.models;
         entry.optionId = choice.optionId;
         entry.points = cost(catalogue, ordinal, choice.models, choice.optionId) ?? choice.points;
@@ -185,6 +189,7 @@ function drawRoster(roster, faction, sheets, result) {
     const attachment = armySetup.attachmentControl(roster, faction, sheets, index);
     if (attachment) details.append(attachment);
     renderEquipment(details, roster, entry, catalogue, sheet);
+    renderCombatLoadout(details, roster, entry, catalogue);
     if (catalogue?.weapons?.length) {
       const calculate = node('button', 'Combat calculator');
       calculate.setAttribute('aria-label', 'Calculate combat for ' + entry.name);
@@ -220,6 +225,59 @@ function drawRoster(roster, faction, sheets, result) {
     row.append(details, actions);
     list.append(row);
   }
+}
+
+function renderCombatLoadout(parent, roster, unit, catalogue) {
+  if (!Number.isInteger(unit.models) || unit.models < 1 || unit.models > 100 || !catalogue?.weapons?.length) return;
+  const detail = node('details', '');
+  detail.append(node('summary', 'Model weapon loadout'));
+  const loadout = window.ForgeRosterBearers.valid(unit.combatLoadout, unit.models)
+    ? structuredClone(unit.combatLoadout) : Array(unit.models).fill(null);
+  detail.addEventListener('toggle', () => {
+    if (!detail.open || detail.children.length > 1) return;
+    detail.append(node('p', 'Record every model for automatic attack counts. This combat loadout does not change army points or certify equipment legality.'));
+    const weapons = [...new Set(catalogue.weapons.map(weapon => weapon.name))];
+    for (let i = 0; i < loadout.length; i++) {
+      const group = node('fieldset', '');
+      group.append(node('legend', 'Model ' + (i + 1)));
+      const state = document.createElement('select');
+      state.setAttribute('aria-label', 'Status of model ' + (i + 1));
+      for (const [label, value] of [['Unrecorded',''],['Surviving','alive'],['Casualty','dead']]) state.add(new Option(label,value));
+      state.value = loadout[i] ? loadout[i].alive ? 'alive' : 'dead' : '';
+      const list = node('div', '');
+      const drawWeapons = () => {
+        list.replaceChildren();
+        for (const [j, weapon] of (loadout[i]?.weapons || []).entries()) {
+          const remove = node('button', 'Remove ' + weapon);
+          remove.onclick = () => { loadout[i].weapons.splice(j, 1); drawWeapons(); };
+          list.append(remove);
+        }
+      };
+      const choice = document.createElement('select');
+      choice.setAttribute('aria-label', 'Add weapon to model ' + (i + 1));
+      choice.add(new Option('Add weapon profile',''));
+      for (const weapon of weapons) choice.add(new Option(weapon, weapon));
+      state.onchange = () => {
+        loadout[i] = state.value ? { alive: state.value === 'alive', weapons: loadout[i]?.weapons || [] } : null;
+        drawWeapons();
+      };
+      choice.onchange = () => {
+        if (!choice.value) return;
+        loadout[i] ??= { alive: true, weapons: [] };
+        if (loadout[i].weapons.length < 30) loadout[i].weapons.push(choice.value);
+        state.value = loadout[i].alive ? 'alive' : 'dead';
+        choice.value = '';
+        drawWeapons();
+      };
+      group.append(state, choice, list);
+      drawWeapons();
+      detail.append(group);
+    }
+    const commit = node('button', 'Save model weapon loadout');
+    commit.onclick = () => { unit.combatLoadout = loadout; save(roster); };
+    detail.append(commit);
+  });
+  parent.append(detail);
 }
 
 function renderEquipment(parent, roster, entry, catalogue, sheet) {
@@ -307,6 +365,7 @@ function parseRoster(text) {
       data.units.some(unit => !unit || typeof unit.name !== 'string' || !unit.name.trim() ||
         !Number.isSafeInteger(unit.points) || unit.points < 0 ||
         (unit.models != null && (!Number.isSafeInteger(unit.models) || unit.models < 1)) ||
+        (unit.combatLoadout != null && !window.ForgeRosterBearers.valid(unit.combatLoadout, unit.models)) ||
         (unit.wargear != null && (!Array.isArray(unit.wargear) ||
           unit.wargear.some(item => typeof item !== 'string' &&
             (!item || typeof item.item !== 'string' || !Number.isSafeInteger(item.quantity) ||

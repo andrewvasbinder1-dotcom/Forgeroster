@@ -63,6 +63,7 @@
   const offence = [
     ['phase', 'Phase', [['ranged', 'Shooting'], ['melee', 'Fight']]],
     ['models', 'Attacking models'], ['copies', 'Weapons per attacking model'],
+    ['weaponCountOverride', 'Total surviving weapons (optional override)'],
     ['attacks', 'Attacks per weapon', 'text'], ['skill', 'Ballistic / Weapon Skill', 'text'], ['strength', 'Strength'],
     ['ap', 'Armour Penetration'], ['damage', 'Damage', 'text'],
   ];
@@ -304,6 +305,7 @@
   }
   function attachSource(record, requestedWeapon) {
     sourceUnit = record;
+    fill({ weaponCountOverride: '' });
     const equipped = (record?.unit.wargear || []).map(w => typeof w === 'string' ? w : w.item);
     $('equipment').textContent = !record ? '' : equipped.length ?
       'Saved equipment: ' + equipped.join(', ') + '. Confirm the selected profile and number of bearers.' :
@@ -331,20 +333,18 @@
     options($('weapon'), 'Manual weapon profile', rows, chosen >= 0 ? String(chosen) :
       auto ? defaultWeapon?.[0] || rows[0]?.[0] : selectedWeapon);
     if ($('weapon').value) applyWeapon();
-    else { if (sourceUnit) currentKeywords = []; originalKeywords = []; renderKeywords(); }
+    else { if (sourceUnit) currentKeywords = []; originalKeywords = []; fill({ weaponCountOverride: '' }); renderKeywords(); }
   }
   function applyWeapon() {
     const weapon = sourceUnit?.profile?.weapons?.[Number($('weapon').value)];
-    if ($('weapon').value === '' || !weapon) { originalKeywords = []; return; }
+    if ($('weapon').value === '' || !weapon) { originalKeywords = []; fill({ weaponCountOverride: '' }); return; }
     const num = text => /^-?\d+/.test(String(text)) ? Number(String(text).match(/^-?\d+/)[0]) : '';
     const range = num(weapon.range);
-    const matching = (sourceUnit.unit.wargear || []).filter(item => clean(typeof item === 'string' ? item : item.item) === clean(weapon.name));
-    const allocations = matching.reduce((count, item) => count + (typeof item === 'string' ? 1 : Number(item.quantity) || 0), 0);
-    // Recorded equipment quantities are useful hints. They do not certify eligible bearers or casualties.
-    fill({ models: allocations ? Math.min(sourceUnit.unit.models || 1, allocations) : '' });
-    $('equipment').textContent = allocations
-      ? allocations + ' matching saved equipment selections. Confirm eligible surviving bearers and copies per model.'
-      : 'Enter the number of surviving models carrying this weapon. The roster has no explicit bearer count for this profile.';
+    const count = window.ForgeRosterBearers.countWeapons(sourceUnit.unit.combatLoadout, sourceUnit.unit.models, weapon.name);
+    fill({ models: count ? Math.max(1, count.bearers) : '', copies: 1, weaponCountOverride: count?.weapons ?? '' });
+    $('equipment').textContent = count
+      ? count.weapons + ' recorded weapons on ' + count.bearers + ' surviving models. Clear the override to use manual counts.'
+      : 'Enter the number of surviving bearers and copies per model, or record every model in the army builder.';
     fill({ attacks: weapon.a, skill: weapon.skill === '-' ? '-' : num(weapon.skill),
       strength: num(weapon.s), ap: num(weapon.ap), damage: weapon.d, range });
     originalKeywords = (weapon.keywords || []).map(engine.keyword);
