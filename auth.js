@@ -19,7 +19,7 @@ function modeSet(next){mode=next;$('frSubmit').textContent=next==='signup'?'Crea
 $('frSwitch').onclick=()=>modeSet(mode==='signup'?'login':'signup');$('frReset').onclick=()=>modeSet('reset');
 const cfg=window.FORGEROSTER_SUPABASE;
 function account(user){identity=user;gate.hidden=true;const header=document.querySelector('header');if(!header)return;let el=$('frAccount');if(!el){el=document.createElement('div');el.id='frAccount';const name=document.createElement('span');name.id='frAccountEmail';const b=document.createElement('button');b.textContent='Sign out';b.onclick=async()=>{await client.auth.signOut();location.reload()};el.append(name,b);header.append(el)}$('frAccountEmail').textContent=user.email||'Signed in'}
-function failConfig(){message('Account login is not configured yet. Site administrator must add Supabase URL and publishable key to auth-config.js.');$('frSubmit').disabled=true;$('frSwitch').disabled=true;$('frReset').disabled=true}
+function failConfig(){gate.hidden=true;const note=document.createElement('div');note.setAttribute('role','status');note.style.cssText='padding:10px 16px;background:#49371c;color:#ffe1a1;font-size:13px';note.textContent='Account sign-in is not yet configured. Roster data is stored only in this browser until authentication is activated.';document.querySelector('header')?.after(note)}
 if(!cfg?.url||!cfg?.anonKey||!window.supabase?.createClient){failConfig();return}
 try{client=window.supabase.createClient(cfg.url,cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){failConfig();return}
 client.auth.getSession().then(({data,error})=>{if(error)message(error.message);if(data?.session?.user)account(data.session.user)}).catch(e=>message(e.message));
