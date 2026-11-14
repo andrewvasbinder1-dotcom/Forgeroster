@@ -74,6 +74,15 @@
       }
       if (entry.stats !== undefined && (!entry.stats || typeof entry.stats !== 'object' || Array.isArray(entry.stats) ||
           Object.values(entry.stats).some(value => !['string', 'number'].includes(typeof value)))) throw Error(`Invalid stats for ${entry.id}`);
+      for (const field of ['minModels','maxModels']) {
+        if (entry[field] !== undefined && (!Number.isSafeInteger(entry[field]) || entry[field] < 1 || entry[field] > 500)) throw Error(`Invalid ${field} for ${entry.id}`);
+      }
+      if (entry.minModels > entry.maxModels) throw Error(`Invalid model range for ${entry.id}`);
+      if (entry.requiredSelections !== undefined && (!Array.isArray(entry.requiredSelections) ||
+        entry.requiredSelections.length > 200 || entry.requiredSelections.some(rule => !validName(rule?.item,200) ||
+          (rule.minimum !== undefined && (!Number.isSafeInteger(rule.minimum) || rule.minimum < 1 || rule.minimum > 500))))) {
+        throw Error(`Invalid required equipment for ${entry.id}`);
+      }
       if (entry.maxCopies !== undefined && (!Number.isInteger(entry.maxCopies) || entry.maxCopies < 1 || entry.maxCopies > 100)) throw Error(`Invalid maxCopies for ${entry.id}`);
     }
     return pack;

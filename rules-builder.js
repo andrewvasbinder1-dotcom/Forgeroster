@@ -6,11 +6,12 @@ const css=document.createElement('style');css.textContent=`
 #frRules .fr-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,360px);gap:14px}#frRules .fr-panel{background:#151e30;border:1px solid #35445d;border-radius:14px;padding:15px;min-width:0}#frRules h2{margin:4px 0 12px;font-size:21px}#frRules .fr-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:10px 0}#frRules select,#frRules input{width:100%;min-width:0}#frRules .fr-unit{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #33425c}#frRules .fr-unit strong{display:block}#frRules .fr-unit small{display:block;color:#acbbd3}#frRules .fr-unit button{white-space:nowrap}#frRules .fr-flag{color:#ffca81}#frRules .fr-good{color:#a2e3b0}#frRules .fr-compact{font-size:13px;color:#acbbd3}#frRules .fr-heading{display:flex;justify-content:space-between;gap:8px;align-items:center}#frRules .fr-total{font-size:28px;font-weight:800}#frRules .fr-pill{background:#263a5b;border-radius:8px;padding:7px 10px}#frRules .fr-enh{display:flex;align-items:center;gap:6px}#frRules .fr-enh input{width:auto}#frRules .fr-actions{display:flex;gap:8px;flex-wrap:wrap}#frRules .fr-actions button{flex:1}#frRules .fr-warning{background:#3d2c1d;border-radius:8px;padding:10px;margin:8px 0;color:#ffddae}
 @media(max-width:760px){#frRules{padding:8px}#frRules .fr-shell{display:flex;flex-direction:column}#frRules .fr-panel{padding:13px}#frRules .fr-unit button{min-height:44px}#frRules .fr-heading{align-items:flex-start}#frRules .fr-total{font-size:25px}}
 `;document.head.append(css);
-const root=document.createElement('div');root.id='frRules';root.innerHTML=`<div class="fr-heading"><div><h2 id="frArmyTitle">Army builder</h2><div id="frMfmVersion" class="fr-compact">Loading imported points…</div></div><div id="frArmyTotal" class="fr-total">0 pts</div></div><div class="fr-shell"><div class="fr-panel"><h2>Add units</h2><input id="frFindUnit" placeholder="Search faction units" aria-label="Search units"><div id="frUnitsAvailable"></div></div><div class="fr-panel"><h2>Army setup</h2><div id="frLimitLabel" class="fr-compact"></div><div id="frSetupChoices"></div><h2>My roster</h2><div id="frRosterUnits"></div><h2>List checks</h2><div id="frValidation"></div><div class="fr-actions"><button id="frExportRules">Export JSON</button><label class="fr-import-button">Import JSON<input id="frImportRules" type="file" accept=".json,application/json"></label><button id="frRefreshRules">Update points</button></div></div></div>`;
+const root=document.createElement('div');root.id='frRules';root.innerHTML=`<div class="fr-heading"><div><h2 id="frArmyTitle">Army builder</h2><div id="frRosterOverview" class="fr-compact"></div><div id="frMfmVersion" class="fr-compact">Loading imported points…</div></div><div id="frArmyTotal" class="fr-total">0 pts</div></div><div class="fr-shell"><div class="fr-panel"><h2>Add units</h2><input id="frFindUnit" placeholder="Search faction units" aria-label="Search units"><div class="fr-filter-row"><input id="frKeywordFilter" placeholder="Role or keyword" aria-label="Filter by role or keyword"><input id="frCostFilter" type="number" min="0" placeholder="Maximum points" aria-label="Maximum unit points"></div><div id="frUnitsAvailable"></div></div><div class="fr-panel"><h2>Army setup</h2><div id="frLimitLabel" class="fr-compact"></div><div id="frSetupChoices"></div><h2>My roster</h2><div id="frRosterUnits"></div><h2>List checks</h2><div id="frValidation"></div><div class="fr-actions"><button id="frExportRules">Export JSON</button><button id="frExportText">Export text</button><button id="frUndo" disabled>Undo edit</button><label class="fr-import-button">Import JSON<input id="frImportRules" type="file" accept=".json,application/json"></label><button id="frRefreshRules">Update points</button></div></div></div>`;
 document.querySelector('main')?.before(root);
 let db=null,loadError='';
 function read(){return window.frRosterStorage.read()}
-function save(r){armySetup.ensureUnitIds(r);window.frRosterStorage.write(r);document.dispatchEvent(new Event('fr-roster-saved'));draw()}
+let undoRoster = null;
+function save(r, keepUndo = true){if(keepUndo) undoRoster = read();if(!r.rulesSnapshot && db?.meta?.version) r.rulesSnapshot = { edition: 11, revision: db.meta.version, effectiveDate: db.meta.lastUpdated };armySetup.ensureUnitIds(r);window.frRosterStorage.write(r);document.dispatchEvent(new Event('fr-roster-saved'));draw()}
 function normal(v){return String(v||'').normalize('NFKD').toLowerCase().replace(/[^a-z0-9]/g,'')}
 function faction(r){return db?.factions?.find(f=>normal(f.name)===normal(r.faction)||normal(f.slug)===normal(r.faction))}
 function opts(u,count){return legality.pricingOptions(u,count)}
@@ -88,7 +89,11 @@ function drawCatalogue(r, f) {
   }
 
   const query = $('frFindUnit').value.trim().toLowerCase();
-  const matches = f.units.filter(unit => unit.name.toLowerCase().includes(query));
+  const keyword = normal($('frKeywordFilter').value);
+  const maximum = $('frCostFilter').value;
+  const matches = f.units.filter(unit => unit.name.toLowerCase().includes(query) &&
+    (!keyword || [unit.role, ...(unit.keywords || [])].some(value => normal(value).includes(keyword))) &&
+    (maximum === '' || opts(unit, 1).some(option => option.points <= Number(maximum))));
   if (!matches.length) available.append(node('p', 'No matching units.'));
   const unitCounts = new Map();
   for (const entry of r.units || []) unitCounts.set(entry.name, (unitCounts.get(entry.name) || 0) + 1);
@@ -200,7 +205,19 @@ function drawRoster(roster, faction, sheets, result) {
       }
       save(roster);
     };
-    row.append(details, remove);
+    const duplicate = node('button', 'Duplicate');
+    duplicate.setAttribute('aria-label', 'Duplicate ' + entry.name);
+    duplicate.onclick = () => {
+      const copy = structuredClone(entry);
+      copy.id = crypto.randomUUID();
+      delete copy.attachedTo;
+      roster.units.splice(index + 1, 0, copy);
+      save(roster);
+    };
+    const actions = node('div','');
+    actions.className = 'actions';
+    actions.append(duplicate, remove);
+    row.append(details, actions);
     list.append(row);
   }
 }
@@ -240,6 +257,10 @@ const f=legality.withRules(faction(r),rules);
 const sheets=rules.filter(entry=>entry.kind==='datasheet');
 const result=legality.validate(r,f,{sheets,pointOverride:window.ForgeRosterPoints?.lookup});
 $('frArmyTitle').textContent=r.name+' · '+r.faction;$('frLimitLabel').textContent='Army limit: '+r.limit+' pts';$('frArmyTotal').textContent=result.total+' / '+r.limit+' pts';$('frMfmVersion').textContent=db ? 'MFM v' + db.meta.version + ' · ' + db.meta.lastUpdated + (db.meta.transcription ? ' · secondary transcription' : '') + (loadError ? ' · refresh failed' : '') : (loadError || 'Loading points catalogue…');
+$('frRosterOverview').textContent = [r.units.length + ' units', ...legality.detachments(r),
+  ...(r.rulesSnapshot?.revision && db?.meta?.version !== r.rulesSnapshot.revision ? ['Saved against MFM ' + r.rulesSnapshot.revision] : []),
+  result.errors.length ? 'Needs corrections' : result.incomplete.length || !db ? 'Unverified draft' : 'Available checks passed'].join(' · ');
+$('frUndo').disabled = !undoRoster;
 armySetup.render(r,f,result,sheets);
 drawCatalogue(r,f);
 drawRoster(r, f, sheets, result);
@@ -256,7 +277,25 @@ for(const [items,title] of [[result.errors,'Resolve before play'],[result.incomp
 }
 if(!result.errors.length&&!result.incomplete.length)validation.append(node('p','All available roster checks passed.'));
 }
-$('frFindUnit').oninput=draw;
+for (const id of ['frFindUnit','frKeywordFilter','frCostFilter']) $(id).oninput=draw;
+$('frUndo').onclick = () => {
+  if (!undoRoster) return;
+  const previous = undoRoster;
+  undoRoster = null;
+  save(previous,false);
+};
+$('frExportText').onclick = () => {
+  const r = read();
+  const lines = [r.name + ' · ' + r.faction, $('frArmyTotal').textContent, $('frRosterOverview').textContent, '',
+    ...r.units.map(unit => unit.name + ' · ' + (unit.models || '?') + ' models' +
+      ((unit.wargear || []).length ? ' · ' + unit.wargear.map(item => typeof item === 'string' ? item : item.item + ' × ' + item.quantity).join(', ') : ''))];
+  const url = URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain'}));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'forgeroster-army.txt';
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url),1000);
+};
 $('frExportRules').onclick=()=>{const a=document.createElement('a'),url=URL.createObjectURL(new Blob([JSON.stringify(read(),null,2)],{type:'application/json'}));a.href=url;a.download='forgeroster-army.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500)};
 function parseRoster(text) {
   const data = JSON.parse(text);
@@ -315,7 +354,7 @@ async function load(force = false) {
   draw();
 }
 $('frRefreshRules').onclick=()=>load(true);
-document.addEventListener('fr-roster-opened',draw);
+document.addEventListener('fr-roster-opened',() => { undoRoster = null; draw(); });
 document.addEventListener('fr-points-changed',draw);
 document.addEventListener('fr-rule-packs-changed',draw);
 draw();load();

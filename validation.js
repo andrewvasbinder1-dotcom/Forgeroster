@@ -188,6 +188,12 @@
       if (Array.isArray(sheet?.modelCounts) && !sheet.modelCounts.map(Number).includes(Number(unit.models))) {
         errors.push(name + ': model count is outside the datasheet options.');
       }
+      if (Number.isInteger(sheet?.minModels) && Number(unit.models) < sheet.minModels) {
+        errors.push(name + ': choose at least ' + sheet.minModels + ' models.');
+      }
+      if (Number.isInteger(sheet?.maxModels) && Number(unit.models) > sheet.maxModels) {
+        errors.push(name + ': choose at most ' + sheet.maxModels + ' models.');
+      }
       const base = priceFor(catalogue, ordinal, unit.models, unit.optionId);
       const overridden = costNumber(pointOverride?.(roster.faction, name, unit.models)?.points);
       const savedPoints = costNumber(unit.points);
@@ -216,6 +222,12 @@
         const perModels = Number.isInteger(constraint.perModels) && constraint.perModels > 0
           ? Math.floor(Number(unit.models) / constraint.perModels) : Infinity;
         if (count > Math.min(max, perModels)) errors.push(name + ': too many copies of ' + constraint.item + '.');
+      }
+      for (const requirement of list(sheet?.requiredSelections)) {
+        const minimum = requirement.minimum ?? 1;
+        if (Number.isSafeInteger(minimum) && minimum > 0 && (gearCounts.get(key(requirement.item)) || 0) < minimum) {
+          errors.push(name + ': select at least ' + minimum + ' × ' + requirement.item + ' in equipment.');
+        }
       }
       for (const group of list(sheet?.exclusiveWargearGroups)) {
         if (list(group).filter(item => gearCounts.get(key(item))).length > 1) {

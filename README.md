@@ -35,3 +35,5 @@ require network access.
 
 ForgeRoster is an independent project and is not affiliated with Games Workshop,
 New Recruit or BattleScribe.
+
+See [production operations](docs/PRODUCTION.md) for migration, administrator provisioning, bug email and verification.

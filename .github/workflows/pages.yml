@@ -18,9 +18,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test tests/*.test.cjs scripts/test-mfm.mjs
+      - name: Prepare static site
+        run: |
+          mkdir _site
+          cp .nojekyll *.html *.js *.css manifest.webmanifest _site/
+          cp -r data icons brand _site/
+          printf '{"version":"2026.11.14","commit":"%s"}\n' "$GITHUB_SHA" > _site/release.json
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

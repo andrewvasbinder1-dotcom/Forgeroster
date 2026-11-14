@@ -1,0 +1,12 @@
+{
+  "edition": 11,
+  "revision": "MFM 1.6",
+  "effectiveDate": "2026-10-14",
+  "importedDate": "2026-11-14",
+  "previousRevision": "unpopulated",
+  "active": true,
+  "source": "https://mfm.warhammer-community.com/en",
+  "transcription": "https://mfmdiff.com/data/1.6/index.json",
+  "verificationStatus": "Secondary transcription and spot checks; complete official comparison pending",
+  "rowAudit": "https://github.com/andrewvasbinder1-dotcom/Forgeroster/blob/main/scripts/verify-points.mjs"
+}
