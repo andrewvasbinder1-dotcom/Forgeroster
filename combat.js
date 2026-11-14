@@ -313,7 +313,7 @@
     }
     if (requestedWeapon) {
       const matching = record?.profile?.weapons?.find(w => clean(w.name) === clean(requestedWeapon));
-      if (matching) fill({ phase: matching.kind });
+      if (matching) fill({ phase: engine.weaponPhase(matching) });
     }
     selectWeapons(true, requestedWeapon);
     renderContext();
@@ -323,13 +323,13 @@
     const selectedWeapon = $('weapon').value;
     const gear = new Set((sourceUnit?.unit.wargear || []).map(w => clean(typeof w === 'string' ? w : w.item)));
     const weapons = sourceUnit?.profile?.weapons || [];
-    const rows = weapons.flatMap((w, i) => w.kind === phase ? [[String(i), w.name + (gear.has(clean(w.name)) ? ' · selected wargear' : '')]] : []);
-    const chosen = desired ? weapons.findIndex(w => w.kind === phase && clean(w.name) === clean(desired)) : -1;
+    const rows = weapons.flatMap((w, i) => engine.weaponPhase(w) === phase ? [[String(i), w.name + (gear.has(clean(w.name)) ? ' · selected wargear' : '')]] : []);
+    const chosen = desired ? weapons.findIndex(w => engine.weaponPhase(w) === phase && clean(w.name) === clean(desired)) : -1;
     const defaultWeapon = rows.find(([i]) => gear.has(clean(weapons[i].name)));
     options($('weapon'), 'Manual weapon profile', rows, chosen >= 0 ? String(chosen) :
       auto ? defaultWeapon?.[0] || rows[0]?.[0] : selectedWeapon);
     if ($('weapon').value) applyWeapon();
-    else { originalKeywords = []; renderKeywords(); }
+    else { if (sourceUnit) currentKeywords = []; originalKeywords = []; renderKeywords(); }
   }
   function applyWeapon() {
     const weapon = sourceUnit?.profile?.weapons?.[Number($('weapon').value)];
@@ -340,7 +340,7 @@
       strength: num(weapon.s), ap: num(weapon.ap), damage: weapon.d, range });
     originalKeywords = (weapon.keywords || []).map(engine.keyword);
     currentKeywords = clone(originalKeywords);
-    if (['strength', 'ap', 'range'].some(k => fields.get(k).control.value === '' && (k !== 'range' || weapon.kind === 'ranged'))) {
+    if (['strength', 'ap', 'range'].some(k => fields.get(k).control.value === '' && (k !== 'range' || engine.weaponPhase(weapon) === 'ranged'))) {
       $('equipment').textContent += ' This profile has a conditional characteristic. Enter the applicable value before calculating.';
     }
     changeKeywords();

@@ -63,7 +63,8 @@ def weapons(body):
             names = texts(row, 'dsWeaponName')
             if not names or len(values) < 8 or not names[0]:
                 continue
-            entry = {'name': names[0], 'kind': kind}
+            profile_kind = 'melee' if values[-6].strip().lower() == 'melee' else kind
+            entry = {'name': names[0], 'kind': profile_kind}
             entry.update(zip(('range', 'a', 'skill', 's', 'ap', 'd'), values[-6:]))
             keywords = texts(row, 'kwbw')
             if keywords:

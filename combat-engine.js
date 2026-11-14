@@ -58,6 +58,9 @@
     }
     return { name: label, label };
   }
+  function weaponPhase(profile) {
+    return /^melee$/i.test(String(profile.range).trim()) ? 'melee' : profile.kind;
+  }
   function woundThreshold(s, t) {
     if (s >= 2 * t) return 2;
     if (s > t) return 3;
@@ -449,7 +452,7 @@
     }
     return summarize(initial, state, {}, 'Monte Carlo · ' + samples + ' samples · seed ' + seed);
   }
-  const api = { source, definitions, example, keyword, woundThreshold, pmf, compile, calculate, live, simulate, seededDie };
+  const api = { source, definitions, example, keyword, weaponPhase, woundThreshold, pmf, compile, calculate, live, simulate, seededDie };
   if (typeof module === 'object') module.exports = api;
   else window.ForgeRosterCombat = api;
 })();

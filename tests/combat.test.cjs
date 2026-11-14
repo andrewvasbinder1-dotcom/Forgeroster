@@ -111,3 +111,8 @@ test('unsupported abilities and unknown profiles are explicit', () => {
   assert.throws(() => plan({ strength: '' }), /Enter strength/);
   assert.throws(() => plan({ attacks: '*' }), /dice notation/);
 });
+
+test('older catalogue mixed tables classify weapon profiles by Melee range', () => {
+  assert.equal(e.weaponPhase({ kind: 'ranged', range: 'Melee' }), 'melee');
+  assert.equal(e.weaponPhase({ kind: 'ranged', range: '24"' }), 'ranged');
+});
