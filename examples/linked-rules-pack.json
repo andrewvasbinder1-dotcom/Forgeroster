@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "example-faction",
+  "title": "Example Faction Rules",
+  "type": "faction",
+  "version": "1.0.0",
+  "edition": "11",
+  "source": "Example content only — replace with material you are authorized to use",
+  "entries": [
+    {
+      "id": "sample-unit",
+      "name": "Sample Infantry",
+      "unit": "Sample Infantry",
+      "faction": "Example Faction",
+      "kind": "datasheet",
+      "text": "Illustrative datasheet, not an official Warhammer unit.",
+      "stats": {
+        "M": "6 inches",
+        "T": 4,
+        "SV": "3+",
+        "W": 2,
+        "LD": "7+",
+        "OC": 2
+      },
+      "keywords": [
+        "EXAMPLE KEYWORD"
+      ],
+      "abilities": [
+        "Example Ability"
+      ],
+      "weapons": [
+        "Example Rifle"
+      ],
+      "modelCounts": [
+        5,
+        10
+      ],
+      "maxCopies": 3,
+      "allowedWargear": [
+        "Example Rifle"
+      ]
+    },
+    {
+      "id": "sample-keyword",
+      "name": "EXAMPLE KEYWORD",
+      "kind": "keyword",
+      "text": "Example definition, for demonstration only.",
+      "keywords": [
+        "EXAMPLE KEYWORD"
+      ]
+    },
+    {
+      "id": "sample-ability",
+      "name": "Example Ability",
+      "kind": "ability",
+      "text": "Example ability description, for demonstration only."
+    },
+    {
+      "id": "sample-weapon",
+      "name": "Example Rifle",
+      "kind": "weapon",
+      "text": "Example weapon profile, for demonstration only."
+    }
+  ]
+}
