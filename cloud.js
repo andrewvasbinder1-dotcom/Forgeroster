@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const style=document.createElement('style');style.textContent=`
 #frLibrary{max-width:1080px;margin:14px auto;padding:0 12px}#frLibrary .fr-wrap{background:#151e30;border:1px solid #34435e;border-radius:14px;padding:16px}#frLibrary .fr-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}#frLibrary .fr-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:12px 0}#frLibrary .fr-item{background:#101827;border:1px solid #34435e;border-radius:10px;padding:13px;min-width:0}#frLibrary .fr-item strong{display:block;overflow-wrap:anywhere}#frLibrary .fr-item small{display:block;color:#b2bfd6;margin:6px 0}#frLibrary button{margin:3px;min-height:44px}#frSyncStatus{font-size:13px;color:#b5c4e0}#frLibrary .fr-danger{color:#ffb9ad}#frLibrary .fr-current{border-color:#83a7e9}#frLibrary .fr-toolbar{display:flex;gap:8px;flex-wrap:wrap}#frLibrary .fr-error{color:#ffb5a8}@media(max-width:600px){#frLibrary{margin:8px auto;padding:0 10px}#frLibrary .fr-list{grid-template-columns:1fr}#frLibrary .fr-head{align-items:flex-start}#frLibrary button{flex:1}}
 `;document.head.append(style);
-const wrap=document.createElement('div');wrap.id='frLibrary';wrap.hidden=true;wrap.innerHTML='<div class="fr-wrap"><div class="fr-head"><div><h2 style="margin:0 0 6px">My Armies</h2><span id="frSyncStatus" role="status" aria-live="polite">Connecting…</span></div><div class="fr-toolbar"><button id="frNewCloud">+ New army</button><button id="frRefreshCloud">Refresh</button><button id="frImportLegacy" hidden>Import device roster</button><button id="frUseCloud" hidden>Discard local changes</button></div></div><div id="frCloudList" class="fr-list"></div></div>';
+const wrap=document.createElement('div');wrap.id='frLibrary';wrap.hidden=true;wrap.innerHTML='<div class="fr-wrap"><div class="fr-head"><div><h2 style="margin:0 0 6px">My Armies</h2><span id="frSyncStatus" role="status" aria-live="polite">Connecting…</span></div><div class="fr-toolbar"><button id="frNewCloud">+ New army</button><button id="frRefreshCloud">Refresh</button><button id="frImportLegacy" hidden>Import device roster</button><button id="frKeepBoth" hidden>Keep both versions</button><button id="frUseCloud" hidden>Discard local changes</button></div></div><div id="frCloudList" class="fr-list"></div></div>';
 document.querySelector('main')?.before(wrap);
 const storage = window.frRosterStorage;
 const columns = 'id,name,faction,points_limit,roster_data,updated_at';
@@ -43,6 +43,7 @@ function acceptCloud(row) {
 function showConflict(message) {
   status(message, true);
   $('frUseCloud').hidden = false;
+  $('frKeepBoth').hidden = false;
 }
 
 window.frCombatRosterLibrary = () => account?.loaded
@@ -109,6 +110,7 @@ function openRoster(state, row) {
   const id = row?.id || null;
   state.active = id;
   $('frUseCloud').hidden = true;
+  $('frKeepBoth').hidden = true;
   if (row && !storage.getDraft(id)?.dirty) acceptCloud(row);
   storage.open(id);
   if (row && storage.getDraft(id)?.dirty) queue(state);
@@ -207,6 +209,7 @@ async function saveChanges(state) {
   }
   if (id && account === state) {
     $('frUseCloud').hidden = true;
+  $('frKeepBoth').hidden = true;
     status('Saved to cloud');
     draw(state);
   }
@@ -256,6 +259,7 @@ function connect(client, user) {
   const state = account;
   window.frCreateCloudRoster = createRoster;
   $('frUseCloud').hidden = true;
+  $('frKeepBoth').hidden = true;
   wrap.hidden = false;
   status('Connecting to cloud…');
   action(state, () => refresh(state));
@@ -276,6 +280,29 @@ $('frNewCloud').onclick = () => {
     if (!state.loaded) throw Error('Cloud storage is unavailable. Refresh and try again.');
     await flush(state);
     if (account === state) openRoster(state, null);
+  });
+};
+$('frKeepBoth').onclick = () => {
+  const state = account;
+  action(state, async () => {
+    const id = state.active;
+    const draft = storage.getDraft(id);
+    if (!draft?.dirty) throw Error('There are no unsynced edits to preserve.');
+    const payload = record({ ...draft.roster, name: String(draft.roster.name || 'My Army').slice(0, 86) + ' (local copy)' });
+    const { data, error } = await state.client.from('rosters').insert({ ...payload, user_id: state.id }).select(columns).single();
+    if (error) throw error;
+    if (account !== state) return;
+    const latest = storage.getDraft(id);
+    if (latest && JSON.stringify(latest.roster) === JSON.stringify(draft.roster)) {
+      storage.discardDraft(id);
+      state.items.unshift(data);
+      openRoster(state, data);
+      status('Both versions preserved. Open the original or the local copy from My Armies.');
+    } else {
+      state.items.unshift(data);
+      draw(state);
+      showConflict('A copy was saved. The current draft has newer edits and remains open.');
+    }
   });
 };
 $('frUseCloud').onclick = () => {
