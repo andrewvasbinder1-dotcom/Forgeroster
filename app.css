@@ -1,0 +1,151 @@
+:focus-visible {
+  outline: 2px solid #a9c8ff;
+  outline-offset: 3px;
+}
+
+header {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+header > * {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+#frNavigation {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-width: 1150px;
+  margin: 12px auto;
+  padding: 0 12px;
+}
+
+#frNavigation [aria-pressed="true"] {
+  background: #334f86;
+  border-color: #a9c8ff;
+}
+
+button, select, input:not([type="checkbox"], [type="radio"]) {
+  min-height: 44px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+body[data-fr-view="builder"] :is(#frRuleLibrary, #frSources, #frLinked),
+body[data-fr-view="rules"] :is(#frWizard, #frRules, #frSources, main),
+body[data-fr-view="sources"] :is(#frWizard, #frRules, #frRuleLibrary, #frLinked, main) {
+  display: none !important;
+}
+
+#frRules .fr-unit > :first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.fr-catalogue-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#frRules .fr-catalogue-controls select {
+  width: auto;
+  max-width: 100%;
+}
+
+@media (max-width: 760px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  #frRules .fr-catalogue-controls {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+}
+
+#frUnitsAvailable {
+  max-height: min(55vh, 610px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+#frRules .fr-import-button {
+  flex: 1;
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 1px solid #52617b;
+  border-radius: 8px;
+  padding: 10px;
+  margin: 0;
+  background: #222d47;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+#frRules .fr-import-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+#frRules .fr-import-button:focus-within {
+  outline: 2px solid #a9c8ff;
+  outline-offset: 3px;
+}
+
+#frRules .fr-unit-profile summary {
+  color: #adc8ff;
+  cursor: pointer;
+  padding: 8px 0;
+}
+
+#frRules .fr-unit:has(.fr-unit-profile[open]) {
+  flex-wrap: wrap;
+}
+
+#frRules .fr-unit:has(.fr-unit-profile[open]) > :first-child {
+  width: 100%;
+}
+
+.fr-profile-table {
+  overflow: auto;
+  margin-bottom: 10px;
+}
+
+.fr-profile-table table {
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.fr-profile-table :is(td, th) {
+  padding: 6px 8px;
+  border-bottom: 1px solid #35445d;
+}
+
+#frRules .fr-roster-unit {
+  align-items: flex-start;
+}
+
+#frRules .fr-roster-unit select {
+  margin-top: 6px;
+}
+
+#frRules .fr-roster-unit > :first-child {
+  flex: 1;
+}
+
+.fr-unit-profile a {
+  color: #adc8ff;
+  display: inline-block;
+  padding: 8px 0;
+}

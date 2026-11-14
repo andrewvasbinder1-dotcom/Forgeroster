@@ -21,3 +21,19 @@ create policy "rosters_update_own" on public.rosters for update to authenticated
 create policy "rosters_delete_own" on public.rosters for delete to authenticated using ((select auth.uid()) = user_id);
 grant select,insert,update,delete on public.rosters to authenticated;
 revoke all on public.rosters from anon;
+
+-- The database assigns revisions. The client compares its previous revision
+-- in every update filter to detect edits made on another device.
+create or replace function public.set_roster_updated_at()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.updated_at := greatest(clock_timestamp(), old.updated_at + interval '1 microsecond');
+  return new;
+end;
+$$;
+drop trigger if exists set_roster_updated_at on public.rosters;
+create trigger set_roster_updated_at before update on public.rosters
+  for each row execute function public.set_roster_updated_at();

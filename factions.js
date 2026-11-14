@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const factions={
-'Imperium':['Adepta Sororitas','Adeptus Custodes','Adeptus Mechanicus','Astra Militarum','Grey Knights','Imperial Agents','Imperial Knights','Space Marines','Black Templars','Blood Angels','Dark Angels','Space Wolves'],
-'Chaos':['Chaos Daemons','Chaos Knights','Chaos Space Marines','Death Guard',"Emperor’s Children",'Thousand Sons','World Eaters'],
+'Imperium':['Adepta Sororitas','Adeptus Custodes','Adeptus Mechanicus','Astra Militarum','Grey Knights','Imperial Agents','Imperial Knights','Space Marines','Black Templars','Blood Angels','Dark Angels','Space Wolves','Deathwatch','Titan Legions'],
+'Chaos':['Chaos Daemons','Chaos Knights','Chaos Space Marines','Death Guard',"Emperor’s Children",'Thousand Sons','World Eaters','Chaos Titan Legions'],
 'Xenos':['Aeldari','Drukhari','Genestealer Cults','Leagues of Votann','Necrons','Orks',"T’au Empire",'Tyranids']
 };
 const all=Object.values(factions).flat(), $=id=>document.getElementById(id);
@@ -13,7 +13,7 @@ factionInput.parentNode.insertBefore(selector,factionInput);factionInput.style.d
 const info=document.createElement('div');info.className='fr-panel';info.innerHTML='<h3>Rules references</h3><p>Browse <a href="https://wahapedia.ru/wh40k11ed_cp/nav.html" target="_blank" rel="noopener noreferrer">Wahapedia 11e factions and datasheets</a> or <a href="https://wahapedia.ru/wh40k11ed/the-rules/core-rules/" target="_blank" rel="noopener noreferrer">11e core rules</a>. These are external references, not copied rules or a synchronized rules database.</p><p><a href="https://www.warhammer-community.com/en-gb/downloads/warhammer-40000/" target="_blank" rel="noopener noreferrer">Games Workshop official downloads</a> for points and updates.</p><h3>Roster checks</h3><div id="frChecks" aria-live="polite"></div>';
 aside.append(info);
 const limit=$('limit'),units=$('units'),total=$('total');
-function getRoster(){try{return JSON.parse(localStorage.getItem('forgeroster-roster-v1')||'{}')}catch{return {}}}
+function getRoster(){return window.frRosterStorage.read()||{}}
 function checks(){const data=getRoster(),items=Array.isArray(data.units)?data.units:[],pts=items.reduce((s,u)=>s+(Number(u.points)||0),0),cap=Number(data.limit)||2000,issues=[];if(!all.includes(data.faction))issues.push('Choose an army faction.');if(![1000,2000].includes(cap))issues.push('Standard 11e Incursion/Strike Force sizes are 1,000 or 2,000 points.');if(pts>cap)issues.push('Roster exceeds points limit by '+(pts-cap)+'.');if(items.some(u=>!u.name||!Number.isFinite(Number(u.points))||Number(u.points)<0))issues.push('Some entries have invalid names or points.');const counts={};for(const u of items){const k=String(u.name||'').trim().toLowerCase();counts[k]=(counts[k]||0)+1}for(const [k,n] of Object.entries(counts)){const max=cap===1000?2:3;if(n>max)issues.push(n+' copies of '+k+': exceeds generic '+max+'-unit limit unless Battleline/Dedicated Transport exception applies.')}if(!items.length)issues.push('No units selected.');const box=$('frChecks');box.replaceChildren();if(!issues.length){const p=document.createElement('p');p.className='fr-valid';p.textContent='Basic roster checks passed. Datasheet, keyword, detachment, Warlord, enhancement, wargear and faction-specific legality NOT verified.';box.append(p)}else for(const issue of issues){const p=document.createElement('p');p.className='fr-error';p.textContent='⚠ '+issue;box.append(p)}}
 function sync(){const data=getRoster();selector.value=all.includes(data.faction)?data.faction:'';checks()}
 selector.addEventListener('change',()=>{factionInput.value=selector.value;factionInput.dispatchEvent(new Event('change',{bubbles:true}));checks()});

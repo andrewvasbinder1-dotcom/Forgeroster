@@ -1,0 +1,1152 @@
+{
+  "schemaVersion": 1,
+  "packs": [
+    {
+      "schemaVersion": 1,
+      "id": "fr-core-11e",
+      "title": "11e core ability and weapon keyword summaries",
+      "type": "core",
+      "version": "2026.11.14",
+      "edition": "11",
+      "source": "Games Workshop 11e Core Rules, with current rules appendix cross-check",
+      "coverage": "Short summaries of commonly used core abilities and weapon traits. Consult the Core Rules and Rules Appendix for combinations and exceptions.",
+      "sources": [
+        {
+          "label": "Games Workshop 11e Core Rules, §§ 10, 19, 24",
+          "url": "https://assets.warhammer-community.com/eng_01-06_warhammer40k_new40k_core_rules-was6fbu1ix-hfewhmxyiy.pdf"
+        },
+        {
+          "label": "Wahapedia current 11e core rules cross-check",
+          "url": "https://wahapedia.ru/wh40k11ed/the-rules/core-rules/"
+        }
+      ],
+      "entries": [
+        {
+          "id": "core-anti",
+          "name": "Anti",
+          "kind": "keyword",
+          "text": "Against the matching target keyword, an unmodified wound roll meeting the weapon’s listed threshold counts as a critical wound.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.03"
+          ]
+        },
+        {
+          "id": "core-assault",
+          "name": "Assault",
+          "kind": "keyword",
+          "text": "An unengaged unit that Advanced may shoot with its Assault weapons.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.04, 10.05"
+          ]
+        },
+        {
+          "id": "core-blast",
+          "name": "Blast",
+          "kind": "keyword",
+          "text": "Gain one attack die per full group of five models in the unit when it was targeted. For Blast X, gain X dice per five models.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.05"
+          ]
+        },
+        {
+          "id": "core-cleave",
+          "name": "Cleave",
+          "kind": "keyword",
+          "text": "If all the weapon’s attacks were assigned to one unit, add X attack dice for each full group of five models it had when targeted.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.06"
+          ]
+        },
+        {
+          "id": "core-close-quarters",
+          "name": "Close-Quarters",
+          "kind": "keyword",
+          "text": "In close-quarters shooting, non-Monster and non-Vehicle models can fire these weapons at enemies engaging the unit. In other shooting, those models choose either their Close-Quarters weapons or their other ranged weapons.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.07, 10.06"
+          ]
+        },
+        {
+          "id": "core-deadly-demise",
+          "name": "Deadly Demise",
+          "kind": "keyword",
+          "text": "After the destroyed model’s passengers finish emergency disembarking, roll a D6. On a 6, every unit within 6″ takes the listed mortal wounds. Roll variable damage separately for each unit.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.08"
+          ]
+        },
+        {
+          "id": "core-deep-strike",
+          "name": "Deep Strike",
+          "kind": "keyword",
+          "text": "If every model in the unit has Deep Strike, its ingress can place it anywhere more than 8″ horizontally from all enemy units, including in the enemy deployment zone.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.09"
+          ]
+        },
+        {
+          "id": "core-devastating-wounds",
+          "name": "Devastating Wounds",
+          "kind": "keyword",
+          "text": "On a critical wound, end that attack sequence and inflict mortal wounds equal to the weapon’s Damage after resolving normal damage. Each critical wound can damage only one model this way.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.10"
+          ]
+        },
+        {
+          "id": "core-extra-attacks",
+          "name": "Extra Attacks",
+          "kind": "keyword",
+          "text": "When this model fights, select all of its Extra Attacks weapons plus one other melee weapon if available.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.11"
+          ]
+        },
+        {
+          "id": "core-feel-no-pain",
+          "name": "Feel No Pain",
+          "kind": "keyword",
+          "text": "Each time the model would lose a wound, roll a D6. Prevent the loss if the roll meets the number shown in the ability.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.12"
+          ]
+        },
+        {
+          "id": "core-fights-first",
+          "name": "Fights First",
+          "kind": "keyword",
+          "text": "When every model has this ability, the unit fights in the Fights First part of the Fight phase.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.13"
+          ]
+        },
+        {
+          "id": "core-firing-deck",
+          "name": "Firing Deck",
+          "kind": "keyword",
+          "text": "When your Transport is selected to shoot, choose up to X embarked models from units that have not shot this phase. Their eligible ranged weapons can shoot as the Transport’s weapons, one per model. Units still embarked become ineligible to shoot for the turn. One Shot weapons are excluded.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.14"
+          ]
+        },
+        {
+          "id": "core-hazardous",
+          "name": "Hazardous",
+          "kind": "keyword",
+          "text": "After the unit’s attacks resolve, make one hazard roll for each Hazardous weapon selected to shoot or fight.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.15"
+          ]
+        },
+        {
+          "id": "core-heavy",
+          "name": "Heavy",
+          "kind": "keyword",
+          "text": "Add 1 to hit in your Shooting phase if the unit is unengaged, did not enter the battlefield this turn, and every model moved at most 3″ this turn.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.16"
+          ]
+        },
+        {
+          "id": "core-hover",
+          "name": "Hover",
+          "kind": "keyword",
+          "text": "A unit with Hover keeps the full maximum movement distance when it takes to the skies.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.17"
+          ]
+        },
+        {
+          "id": "core-ignores-cover",
+          "name": "Ignores Cover",
+          "kind": "keyword",
+          "text": "The target receives no benefit of cover against attacks from this weapon, even if an ability would provide cover.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.18"
+          ]
+        },
+        {
+          "id": "core-indirect-fire",
+          "name": "Indirect Fire",
+          "kind": "keyword",
+          "text": "Allows the unit to use indirect shooting. Check the indirect shooting rules for restrictions and penalties when firing without visibility.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.19, 10.07"
+          ]
+        },
+        {
+          "id": "core-infiltrators",
+          "name": "Infiltrators",
+          "kind": "keyword",
+          "text": "If every model has Infiltrators, the unit can deploy more than 8″ horizontally from the enemy deployment zone and all enemy units.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.20"
+          ]
+        },
+        {
+          "id": "core-lance",
+          "name": "Lance",
+          "kind": "keyword",
+          "text": "Add 1 to wound if the attacker’s unit made a charge move this turn.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.21"
+          ]
+        },
+        {
+          "id": "core-leader",
+          "name": "Leader",
+          "kind": "keyword",
+          "text": "An eligible Leader can join one of its listed bodyguard units during battle formations.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.22, 19"
+          ]
+        },
+        {
+          "id": "core-lethal-hits",
+          "name": "Lethal Hits",
+          "kind": "keyword",
+          "text": "On a critical hit you may skip the wound roll and automatically wound. Doing so cannot trigger effects tied to a critical wound.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.23"
+          ]
+        },
+        {
+          "id": "core-lone-operative",
+          "name": "Lone Operative",
+          "kind": "keyword",
+          "text": "A standalone Lone Operative is invisible to enemies outside 12″, or the range stated in the ability. Indirect Fire also cannot target it from outside that range. Check attached-unit exceptions in the appendix.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.24"
+          ]
+        },
+        {
+          "id": "core-melta",
+          "name": "Melta",
+          "kind": "keyword",
+          "text": "Add X Damage if the target was within half the weapon’s range when you selected targets.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.25"
+          ]
+        },
+        {
+          "id": "core-one-shot",
+          "name": "One Shot",
+          "kind": "keyword",
+          "text": "Each weapon can be selected once per battle. Returning a destroyed bearer to its unit does not reset an already-used weapon.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.26"
+          ]
+        },
+        {
+          "id": "core-pistol",
+          "name": "Pistol",
+          "kind": "keyword",
+          "text": "Use the same rules as Close-Quarters. Pistol is the older label.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.27"
+          ]
+        },
+        {
+          "id": "core-precision",
+          "name": "Precision",
+          "kind": "keyword",
+          "text": "At Allocation Order, choose a group containing a Character visible to at least one attacker. That group receives the weapon’s attacks until destroyed or the attacks finish.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.28"
+          ]
+        },
+        {
+          "id": "core-psychic",
+          "name": "Psychic",
+          "kind": "keyword",
+          "text": "You can ignore any skill and hit-roll modifiers for attacks with this weapon. Other abilities can check whether an attack is Psychic.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.29"
+          ]
+        },
+        {
+          "id": "core-rapid-fire",
+          "name": "Rapid Fire",
+          "kind": "keyword",
+          "text": "Add X attack dice when the target was within half the weapon’s range as you selected targets.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.30"
+          ]
+        },
+        {
+          "id": "core-scouts",
+          "name": "Scouts",
+          "kind": "keyword",
+          "text": "If every model has Scouts, the unit can take its listed pre-battle move from its deployment zone or deploy wholly in that zone from Strategic Reserves. An eligible Dedicated Transport can take the move instead. The move ends more than 8″ horizontally from each enemy.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.31–32"
+          ]
+        },
+        {
+          "id": "core-stealth",
+          "name": "Stealth",
+          "kind": "keyword",
+          "text": "The entire unit gains the benefit of cover against ranged attacks when every model has this ability.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.33"
+          ]
+        },
+        {
+          "id": "core-support",
+          "name": "Support",
+          "kind": "keyword",
+          "text": "A Support unit can join a listed bodyguard during battle formations. A bodyguard can include a Leader and a Support where the attachment rules allow both.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.34, 19"
+          ]
+        },
+        {
+          "id": "core-super-heavy-walker",
+          "name": "Super-Heavy Walker",
+          "kind": "keyword",
+          "text": "When moving normally, Advancing or Falling Back, the unit can cross non-Titanic models and terrain sections up to 4″ tall. It can take Mobile for that move and then risks battle-shock on a roll of 1.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.35"
+          ]
+        },
+        {
+          "id": "core-sustained-hits",
+          "name": "Sustained Hits",
+          "kind": "keyword",
+          "text": "Each critical hit generates the listed number of extra hits on the target.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.36"
+          ]
+        },
+        {
+          "id": "core-torrent",
+          "name": "Torrent",
+          "kind": "keyword",
+          "text": "The weapon’s attacks automatically hit. The rules appendix excludes pairing Torrent with Indirect Fire or Precision.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.37"
+          ]
+        },
+        {
+          "id": "core-twin-linked",
+          "name": "Twin-Linked",
+          "kind": "keyword",
+          "text": "You may reroll the weapon’s wound rolls.",
+          "references": [
+            "Games Workshop 11e Core Rules § 24.38"
+          ]
+        },
+        {
+          "id": "core-damaged",
+          "name": "Damaged",
+          "kind": "keyword",
+          "text": "Subtract 1 from hit rolls once the model has its listed remaining wounds or fewer.",
+          "references": [
+            "Wahapedia 11e Core Rules § 24.39"
+          ]
+        }
+      ]
+    },
+    {
+      "schemaVersion": 1,
+      "id": "fr-votann-11e",
+      "title": "Leagues of Votann reference summaries",
+      "type": "faction",
+      "version": "2026.10.14",
+      "edition": "11",
+      "source": "Games Workshop Leagues of Votann Faction Pack v1.2 and 11e Core Rules",
+      "coverage": "Partial coverage: Berehk Stornbröw, the five detachments published in the Faction Pack, the faction rule and selected datasheet updates. Consult the current Codex and official updates for the remaining datasheets and detachments.",
+      "sources": [
+        {
+          "label": "Games Workshop Leagues of Votann Faction Pack v1.2",
+          "url": "https://assets.warhammer-community.com/eng_14-10_wh40k_faction_pack_leagues_of_votann-os3nsdjlao-buac8a7pzn.pdf"
+        },
+        {
+          "label": "Games Workshop Codex preview of Prioritised Efficiency",
+          "url": "https://www.warhammer-community.com/en-gb/articles/id57ps8z/maximise-your-yields-with-the-new-leagues-of-votann-army-rule/"
+        },
+        {
+          "label": "Games Workshop 11e Core Rules downloads",
+          "url": "https://www.warhammer-community.com/en-gb/articles/nhqt9wx3/new40k-rules-download-the-free-core-rules-now/"
+        },
+        {
+          "label": "Wahapedia 11e faction rules cross-check",
+          "url": "https://wahapedia.ru/wh40k11ed/factions/leagues-of-votann/"
+        },
+        {
+          "label": "Wahapedia 11e matched-play datasheet cross-check",
+          "url": "https://wahapedia.ru/wh40k11ed/factions/leagues-of-votann/datasheets.html"
+        }
+      ],
+      "entries": [
+        {
+          "id": "votann-yield",
+          "name": "Prioritised Efficiency",
+          "kind": "faction-rule",
+          "faction": "Leagues of Votann",
+          "text": "Start in Hostile Acquisition. At the end of your Command phase, after accounting for Yield Points (YP), use Hostile Acquisition below 7 YP or Fortify Takeover at 7 YP or more. That choice holds until your next Command phase. At the end of either player’s Command phase, gain 1 YP for controlling a home objective. From round 2, also gain 1 each for controlling at least one objective outside your deployment zone, controlling at least two outside it, and controlling more objectives overall than your opponent.",
+          "references": [
+            "Games Workshop Codex preview: Maximise your yields",
+            "Wahapedia 11e: Leagues of Votann army rules"
+          ]
+        },
+        {
+          "id": "votann-hostile",
+          "name": "Hostile Acquisition",
+          "kind": "ability",
+          "faction": "Leagues of Votann",
+          "text": "Reroll Advance and Charge rolls. Attacks get +1 to hit when the enemy unit is in range of an objective.",
+          "references": [
+            "Games Workshop Codex preview: Maximise your yields",
+            "Wahapedia 11e: Leagues of Votann army rules"
+          ]
+        },
+        {
+          "id": "votann-fortify",
+          "name": "Fortify Takeover",
+          "kind": "ability",
+          "faction": "Leagues of Votann",
+          "text": "An attacking unit gets +1 to hit from within range of an objective your army controls. When an incoming attack’s Strength beats a friendly non-Vehicle unit’s Toughness, that attack takes −1 to wound.",
+          "references": [
+            "Games Workshop Codex preview: Maximise your yields",
+            "Wahapedia 11e: Leagues of Votann army rules"
+          ]
+        },
+        {
+          "id": "berehk",
+          "name": "Berehk Stornbröw",
+          "kind": "datasheet",
+          "faction": "Leagues of Votann",
+          "text": "One Epic Hero equipped with Kromlôk’s Revenge and Warforge Gauntlets. Kromlôk’s Revenge is a single weapon with two profiles. Choose its profile before selecting targets. Berehk can lead Cthonian Beserks.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, pp. 9–10",
+            "Wahapedia 11e: Berehk Stornbröw"
+          ],
+          "unit": "Berehk Stornbröw",
+          "stats": {
+            "M": "6″",
+            "T": 6,
+            "SV": "5+",
+            "W": 5,
+            "LD": "7+",
+            "OC": 1,
+            "Invulnerable": "5+"
+          },
+          "keywords": [
+            "INFANTRY",
+            "CHARACTER",
+            "EPIC HERO",
+            "CTHONIAN",
+            "BEREHK STORNBRÖW",
+            "LEAGUES OF VOTANN"
+          ],
+          "abilities": [
+            "Feel No Pain 4+",
+            "Leader",
+            "Prioritised Efficiency",
+            "Break the Foe",
+            "Relentless Avalanche"
+          ],
+          "weapons": [
+            "Kromlôk’s Revenge – graviton strikes",
+            "Kromlôk’s Revenge – plasma sweeps",
+            "Warforge Gauntlets"
+          ],
+          "modelCounts": [
+            1
+          ],
+          "maxCopies": 1,
+          "allowedWargear": [],
+          "leaderTargets": [
+            "Cthonian Beserks"
+          ]
+        },
+        {
+          "id": "berehk-graviton",
+          "name": "Kromlôk’s Revenge – graviton strikes",
+          "kind": "weapon",
+          "faction": "Leagues of Votann",
+          "text": "Select this profile when using the heavy strikes, especially against Monsters or Vehicles.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, pp. 9–10"
+          ],
+          "unit": "Berehk Stornbröw",
+          "stats": {
+            "Range": "Melee",
+            "A": 4,
+            "WS": "2+",
+            "S": 10,
+            "AP": -2,
+            "D": 4
+          },
+          "keywords": [
+            "ANTI-MONSTER 3+",
+            "ANTI-VEHICLE 3+"
+          ]
+        },
+        {
+          "id": "berehk-plasma",
+          "name": "Kromlôk’s Revenge – plasma sweeps",
+          "kind": "weapon",
+          "faction": "Leagues of Votann",
+          "text": "This profile makes more attacks at lower Strength and Damage than graviton strikes.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, pp. 9–10"
+          ],
+          "unit": "Berehk Stornbröw",
+          "stats": {
+            "Range": "Melee",
+            "A": 8,
+            "WS": "2+",
+            "S": 7,
+            "AP": -2,
+            "D": 2
+          },
+          "keywords": []
+        },
+        {
+          "id": "berehk-gauntlets",
+          "name": "Warforge Gauntlets",
+          "kind": "weapon",
+          "faction": "Leagues of Votann",
+          "text": "Resolve these extra attacks in addition to the weapon chosen to fight with.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, pp. 9–10"
+          ],
+          "unit": "Berehk Stornbröw",
+          "stats": {
+            "Range": "Melee",
+            "A": 2,
+            "WS": "2+",
+            "S": 6,
+            "AP": -2,
+            "D": 1
+          },
+          "keywords": [
+            "EXTRA ATTACKS"
+          ]
+        },
+        {
+          "id": "berehk-break",
+          "name": "Break the Foe",
+          "kind": "ability",
+          "faction": "Leagues of Votann",
+          "text": "Give the unit’s melee weapons Sustained Hits 1, so a critical hit generates one additional hit.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, pp. 9–10"
+          ],
+          "unit": "Berehk Stornbröw"
+        },
+        {
+          "id": "berehk-avalanche",
+          "name": "Relentless Avalanche",
+          "kind": "ability",
+          "faction": "Leagues of Votann",
+          "text": "Berehk’s unit can use Heroic Intervention at a 1 CP discount. Its use is independent of the stratagem’s use on other units in that phase, in either order.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, pp. 9–10"
+          ],
+          "unit": "Berehk Stornbröw"
+        },
+        {
+          "id": "fnp4",
+          "name": "Feel No Pain 4+",
+          "kind": "keyword",
+          "faction": "Leagues of Votann",
+          "text": "Roll once per wound the model would lose. Ignore that wound on a 4 or higher.",
+          "references": [
+            "Games Workshop 11e Core Rules: Feel No Pain"
+          ]
+        },
+        {
+          "id": "sagitaur-spearhead",
+          "name": "Sagitaur Spearhead",
+          "kind": "detachment-rule",
+          "faction": "Leagues of Votann",
+          "text": "Your Sagitaurs gain a 6″ Scouts move.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 2"
+          ],
+          "detachment": "Armoured Trailblazers"
+        },
+        {
+          "id": "saturation-rounds",
+          "name": "Saturation Rounds (Upgrade)",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "Eligible Sagitaur units gain Ignores Cover on their ranged attacks.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 2"
+          ],
+          "detachment": "Armoured Trailblazers",
+          "eligibleUnits": [
+            "Sagitaur"
+          ],
+          "upgrade": true
+        },
+        {
+          "id": "optimised-attack",
+          "name": "Optimised Attack Lines (Upgrade)",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "Gives a Sagitaur the Mobile keyword.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 2"
+          ],
+          "detachment": "Armoured Trailblazers",
+          "eligibleUnits": [
+            "Sagitaur"
+          ],
+          "upgrade": true
+        },
+        {
+          "id": "coordinated-crossfire",
+          "name": "Coordinated Crossfire",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "At the start of your Shooting phase, spend 1 CP to pick up to two of your Sagitaurs and one enemy unit. When those Sagitaurs shoot that target, they can reroll hit and wound rolls of 1.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 2"
+          ],
+          "detachment": "Armoured Trailblazers"
+        },
+        {
+          "id": "outflanking-armour",
+          "name": "Outflanking Armour",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "From round 2, at the end of the opposing Movement phase, spend 1 CP to bring in up to two Sagitaurs from Strategic Reserves with an ingress move each.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 2"
+          ],
+          "detachment": "Armoured Trailblazers"
+        },
+        {
+          "id": "built-to-last",
+          "name": "Built to Last",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP when a Sagitaur is targeted in the enemy Shooting phase. Ranged attacks targeting it take −1 to wound if their Strength exceeds its Toughness.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 2"
+          ],
+          "detachment": "Armoured Trailblazers"
+        },
+        {
+          "id": "eye-of-the-hunt",
+          "name": "Eye of the Hunt",
+          "kind": "detachment-rule",
+          "faction": "Leagues of Votann",
+          "text": "Hernkyn units shoot with +1 to hit at targets within 12″.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 3"
+          ],
+          "detachment": "Farseekers"
+        },
+        {
+          "id": "pan-spectral",
+          "name": "Pan-spectral Lockons (Upgrade)",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "A Hernkyn Pioneers unit can spot a visible enemy within 12″ in your Shooting phase. Spotting adds 3″ to that enemy unit’s detection range.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 3"
+          ],
+          "detachment": "Farseekers",
+          "eligibleUnits": [
+            "Hernkyn Pioneers"
+          ],
+          "upgrade": true
+        },
+        {
+          "id": "shroudwerke",
+          "name": "Shroudwërke Talismans (Upgrade)",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "Reduce the upgraded Hernkyn Yaegirs unit’s detection range by 3″.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 3"
+          ],
+          "detachment": "Farseekers",
+          "eligibleUnits": [
+            "Hernkyn Yaegirs"
+          ],
+          "upgrade": true
+        },
+        {
+          "id": "scornful-analysis",
+          "name": "Scornful Analysis",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP at the start of your Shooting phase. Choose one Hernkyn unit and a visible enemy within 12″ of it. Your Leagues of Votann units’ attacks gain Ignores Cover against that enemy.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 3"
+          ],
+          "detachment": "Farseekers"
+        },
+        {
+          "id": "no-shot-wasted",
+          "name": "No Shot Wasted",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP when selecting a Hernkyn unit to shoot. Its ranged attacks gain Lethal Hits.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 3"
+          ],
+          "detachment": "Farseekers"
+        },
+        {
+          "id": "economy-of-motion",
+          "name": "Economy of Motion",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "In the opposing Movement phase, spend 1 CP after an enemy ends a move within 8″ of unengaged Hernkyn Pioneers. Those Pioneers can make a Normal move of up to D3+3″.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 3"
+          ],
+          "detachment": "Farseekers"
+        },
+        {
+          "id": "avatars-ancestors",
+          "name": "Avatars of the Ancestors",
+          "kind": "detachment-rule",
+          "faction": "Leagues of Votann",
+          "text": "Kâhl, Einhyr Champion, Einhyr Hearthguard and Ûthar the Destined units reroll ranged wound rolls of 1 against targets within 9″. The unique tag prevents taking this alongside Hearthband.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 4"
+          ],
+          "detachment": "Hearthguard Covenant"
+        },
+        {
+          "id": "covenant-high-kahl",
+          "name": "High Kâhl",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "If a model in the bearer’s unit dies in the Fight phase before the unit has been selected to fight, roll a D6. On a 4+, leave it in place until the unit finishes fighting or the phase ends, whichever is first.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 4"
+          ],
+          "detachment": "Hearthguard Covenant",
+          "eligibleUnits": [
+            "Kâhl"
+          ]
+        },
+        {
+          "id": "covenant-ironskein",
+          "name": "Ironskein",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "The Kâhl gains 2 Wounds.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 4"
+          ],
+          "detachment": "Hearthguard Covenant",
+          "eligibleUnits": [
+            "Kâhl"
+          ]
+        },
+        {
+          "id": "covenant-brekkeknots",
+          "name": "Brëkkeknots",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP when an enemy targets your Einhyr Hearthguard in the opposing Shooting phase or a Fight phase. The Hearthguard get a 4+ invulnerable save.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 4"
+          ],
+          "detachment": "Hearthguard Covenant"
+        },
+        {
+          "id": "covenant-fury",
+          "name": "Fury of the Hearth",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP when selecting Einhyr Hearthguard to shoot. Their ranged attacks gain 1 Strength. Spend 1 YP to also give them Sustained Hits 1.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 4"
+          ],
+          "detachment": "Hearthguard Covenant"
+        },
+        {
+          "id": "covenant-matrices",
+          "name": "Materialisation Matrices",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP when Einhyr Hearthguard with Deep Strike make an ingress move in your Movement phase. They can arrive anywhere more than 6″ horizontally from every enemy, including the enemy deployment zone. They give up charging for the rest of the turn.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 4"
+          ],
+          "detachment": "Hearthguard Covenant"
+        },
+        {
+          "id": "methodical-annihilation",
+          "name": "Methodical Annihilation",
+          "kind": "detachment-rule",
+          "faction": "Leagues of Votann",
+          "text": "When a friendly Votann model attacks its weapon’s nearest legal target or an enemy engaging its unit, reroll wound rolls of 1. Improve AP by 1 as well if the attacking unit is a Kâhl, Einhyr Hearthguard or Ûthar the Destined unit.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 5"
+          ],
+          "detachment": "Hearthband"
+        },
+        {
+          "id": "bastion-shield",
+          "name": "Bastion Shield",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "Worsen incoming ranged AP by 1 when the attacker is within 12″ of the bearer’s unit. Spending 1 YP extends this protection to 18″ through the end of the phase.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 5"
+          ],
+          "detachment": "Hearthband"
+        },
+        {
+          "id": "quake-multigenerator",
+          "name": "Quake Multigenerator",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "After this Kâhl shoots, choose one non-Titanic enemy unit hit by the bearer. Its attacks take −1 to hit until your next turn begins.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 5"
+          ],
+          "detachment": "Hearthband",
+          "eligibleUnits": [
+            "Kâhl"
+          ]
+        },
+        {
+          "id": "hearthband-ironskein",
+          "name": "Ironskein",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "Add 2 to the bearer’s Wounds characteristic.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 5"
+          ],
+          "detachment": "Hearthband"
+        },
+        {
+          "id": "hearthband-high-kahl",
+          "name": "High Kâhl",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "When an enemy melee attack kills a model from the bearer’s unit that is yet to fight this phase, roll a D6. On 4+, the slain model fights immediately after the attacker finishes resolving attacks and is removed afterwards.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 5"
+          ],
+          "detachment": "Hearthband",
+          "eligibleUnits": [
+            "Kâhl"
+          ]
+        },
+        {
+          "id": "hearthband-brekkeknots",
+          "name": "Brëkkeknots",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP when the enemy selects a friendly Kâhl, Ûthar the Destined or Einhyr Hearthguard unit as a target in the opposing Shooting phase or either Fight phase. The targeted unit gets a 4+ invulnerable save for that phase.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 6"
+          ],
+          "detachment": "Hearthband"
+        },
+        {
+          "id": "sure-of-purpose",
+          "name": "Sure of Purpose",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP in the Fight phase for a friendly Votann unit that has yet to be selected to fight. It can move its models up to 6″ on Pile-in and Consolidation moves that phase.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 6"
+          ],
+          "detachment": "Hearthband"
+        },
+        {
+          "id": "superior-craftsmanship",
+          "name": "Superior Craftsmanship",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 2 CP in the Fight phase on a friendly Votann unit yet to be selected to fight. It deals +1 Damage on attacks against Monsters and Vehicles that phase.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 6"
+          ],
+          "detachment": "Hearthband"
+        },
+        {
+          "id": "unyielding-aggression",
+          "name": "Unyielding Aggression",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP after your Votann Infantry unit Falls Back in your Movement phase. It can still shoot and charge this turn.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 6"
+          ],
+          "detachment": "Hearthband"
+        },
+        {
+          "id": "hearthband-matrices",
+          "name": "Materialisation Matrices",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP in your Reinforcements step for a Votann unit using Deep Strike from Reserves. Keep it more than 6″ horizontally from all enemy units when placing it. The unit gives up charging that turn.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 6"
+          ],
+          "detachment": "Hearthband"
+        },
+        {
+          "id": "hearthband-fury",
+          "name": "Fury of the Hearth",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP on Einhyr Hearthguard yet to be selected to shoot in your Shooting phase. Their ranged weapons gain 1 Strength for the phase. Spend 1 YP for Sustained Hits 1 on those weapons too.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 6"
+          ],
+          "detachment": "Hearthband"
+        },
+        {
+          "id": "ruthless-reinvestment",
+          "name": "Ruthless Reinvestment",
+          "kind": "detachment-rule",
+          "faction": "Leagues of Votann",
+          "text": "Start in Hostile Acquisition. This detachment replaces the automatic switch at 7 YP. You may spend 3 YP at the end of your Command phase to toggle your army between Hostile Acquisition and Fortify Takeover.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 7"
+          ],
+          "detachment": "Mercenary Oathband"
+        },
+        {
+          "id": "mercenary-prospector",
+          "name": "Mercenary Prospector",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "Gain 2 YP each time the bearer’s unit kills an enemy unit.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 7"
+          ],
+          "detachment": "Mercenary Oathband",
+          "eligibleUnits": [
+            "Kâhl"
+          ]
+        },
+        {
+          "id": "metaphysical-brokerage",
+          "name": "Metaphysical Brokerage",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "If the bearer is on the battlefield at the end of your turn, top up the YP earned that turn to 3 if you gained fewer.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 7"
+          ],
+          "detachment": "Mercenary Oathband",
+          "eligibleUnits": [
+            "Memnyr Strategist"
+          ]
+        },
+        {
+          "id": "etacarn-targeting",
+          "name": "Etacarn SB9 Targeting Implant",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "The bearer’s unit rerolls hit rolls of 1. When selecting the unit to shoot or fight, spend 3 YP to add Sustained Hits 1 to its attacks for that phase.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 7"
+          ],
+          "detachment": "Mercenary Oathband"
+        },
+        {
+          "id": "asset-manipulator",
+          "name": "Asset Manipulator",
+          "kind": "enhancement",
+          "faction": "Leagues of Votann",
+          "text": "At the start of your Command phase, spend 3 YP to give enemy models in units within 3″ of the bearer −1 Objective Control for the rest of the turn.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 7"
+          ],
+          "detachment": "Mercenary Oathband"
+        },
+        {
+          "id": "auxiliary-contract",
+          "name": "Auxiliary Contract",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP in your Shooting phase or a Fight phase on a Votann Infantry or Mounted unit that has yet to be selected to shoot or fight in that phase. Its weapons gain Precision for the phase.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 8"
+          ],
+          "detachment": "Mercenary Oathband"
+        },
+        {
+          "id": "optimal-expenditure",
+          "name": "Optimal Expenditure",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP in the Fight phase on Votann Infantry yet to be selected to fight. Its attacks reroll hits and wounds of 1 for the phase. An extra 3 YP lets you reroll any wound roll while still rerolling only hits of 1.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 8"
+          ],
+          "detachment": "Mercenary Oathband"
+        },
+        {
+          "id": "grand-artifice",
+          "name": "Grand Artifice",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP after a Votann unit Falls Back in your Movement phase. It can still shoot and charge this turn.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 8"
+          ],
+          "detachment": "Mercenary Oathband"
+        },
+        {
+          "id": "privateer-arsenal",
+          "name": "Privateer Arsenal",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "Spend 1 CP in your Shooting phase on Votann Infantry yet to be selected to shoot. It rerolls hit and wound rolls of 1 for the phase. An extra 3 YP lets you reroll any hit roll while still rerolling only wounds of 1.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 8"
+          ],
+          "detachment": "Mercenary Oathband"
+        },
+        {
+          "id": "new-horizons",
+          "name": "New Horizons",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "At the end of the enemy Fight phase, spend 1 CP to embark unengaged Votann Infantry wholly within 6″ of an eligible friendly Transport.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 8"
+          ],
+          "detachment": "Mercenary Oathband"
+        },
+        {
+          "id": "mobile-exploitation",
+          "name": "Mobile Exploitation",
+          "kind": "stratagem",
+          "faction": "Leagues of Votann",
+          "text": "At the end of the enemy Fight phase, spend 1 CP to move one unengaged Hernkyn unit into Strategic Reserves. Spend an additional 2 YP to pick up to two eligible units instead.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 8"
+          ],
+          "detachment": "Mercenary Oathband"
+        },
+        {
+          "id": "buri-vengeance",
+          "name": "Unhinged Vengeance",
+          "kind": "errata",
+          "faction": "Leagues of Votann",
+          "text": "After an enemy unit shoots in the opponent’s Shooting phase, Buri’s unit can make a surge move of up to D6+2″ if those attacks cost Buri a wound.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 11",
+            "Wahapedia 11e: unit entry or faction FAQ"
+          ],
+          "unit": "Buri Aegnirssen"
+        },
+        {
+          "id": "hekaton-transport",
+          "name": "Transport capacity",
+          "kind": "errata",
+          "faction": "Leagues of Votann",
+          "text": "Carries 14 Leagues of Votann Infantry. Exoarmour, Exoframe and Ironkin Steeljacks use two spaces per model. Artillery cannot embark. The Fortress has the Frame keyword.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 11",
+            "Wahapedia 11e: unit entry or faction FAQ"
+          ],
+          "unit": "Hekaton Land Fortress"
+        },
+        {
+          "id": "yaegirs-hunters",
+          "name": "Pragmatic Hunters",
+          "kind": "errata",
+          "faction": "Leagues of Votann",
+          "text": "If an enemy ends a move within 8″ in the opposing Movement phase, unengaged Yaegirs can make a Normal move up to D6″.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 11",
+            "Wahapedia 11e: unit entry or faction FAQ"
+          ],
+          "unit": "Hernkyn Yaegirs"
+        },
+        {
+          "id": "memnyr-guidance",
+          "name": "Predictive Guidance",
+          "kind": "errata",
+          "faction": "Leagues of Votann",
+          "text": "Once per round, discount a Fire Overwatch or Heroic Intervention stratagem targeting this unit by 1 CP.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 11",
+            "Wahapedia 11e: unit entry or faction FAQ"
+          ],
+          "unit": "Memnyr Strategist"
+        },
+        {
+          "id": "sagitaur-transport",
+          "name": "Transport capacity",
+          "kind": "errata",
+          "faction": "Leagues of Votann",
+          "text": "Carries six Leagues of Votann Infantry. Artillery, Exoarmour, Exoframe and Ironkin Steeljacks cannot embark. The Sagitaur has the Frame keyword.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 11",
+            "Wahapedia 11e: unit entry or faction FAQ"
+          ],
+          "unit": "Sagitaur"
+        },
+        {
+          "id": "uthar-fortune",
+          "name": "Ancestral Fortune",
+          "kind": "errata",
+          "faction": "Leagues of Votann",
+          "text": "Once per turn, spend 1 YP to treat one of Ûthar’s hit rolls, wound rolls or saving throws as an unmodified 6.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 11",
+            "Wahapedia 11e: unit entry or faction FAQ"
+          ],
+          "unit": "Ûthar the Destined"
+        },
+        {
+          "id": "arkanyst-clarification",
+          "name": "Science Guild Support FAQ",
+          "kind": "errata",
+          "faction": "Leagues of Votann",
+          "text": "Another Arkanyst Evaluator on its own within 3″ cannot grant this model Lone Operative.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, p. 11",
+            "Wahapedia 11e: unit entry or faction FAQ"
+          ],
+          "unit": "Arkanyst Evaluator"
+        },
+        {
+          "id": "hearthband-restriction",
+          "name": "Hearthband",
+          "kind": "detachment",
+          "faction": "Leagues of Votann",
+          "text": "This detachment is in the Hearthband unique group and cannot be selected with Hearthguard Covenant.",
+          "references": [
+            "Official Munitorum Field Manual v1.6, Leagues of Votann detachments",
+            "Games Workshop Faction Pack v1.2, p. 5"
+          ],
+          "detachment": "Hearthband",
+          "forbiddenDetachments": [
+            "Hearthguard Covenant"
+          ]
+        },
+        {
+          "id": "hearthguard-covenant-restriction",
+          "name": "Hearthguard Covenant",
+          "kind": "detachment",
+          "faction": "Leagues of Votann",
+          "text": "This detachment is in the Hearthband unique group and cannot be selected with Hearthband.",
+          "references": [
+            "Official Munitorum Field Manual v1.6, Leagues of Votann detachments",
+            "Games Workshop Faction Pack v1.2, p. 4"
+          ],
+          "detachment": "Hearthguard Covenant",
+          "forbiddenDetachments": [
+            "Hearthband"
+          ]
+        }
+      ]
+    }
+  ]
+}
