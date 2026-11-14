@@ -112,6 +112,7 @@
       flag(Number.isInteger(n) && n >= 0 && n <= 20, name + ' needs a whole-number value from 0 to 20.');
       return n;
     };
+    flag(c.models !== '', 'Enter the number of eligible attacking models.');
     const weaponCount = bounded('models', 1, 100, 1) * bounded('copies', 1, 20, 1);
     const models = bounded('targets', 1, 100, 1);
     const wounds = bounded('wounds', 1, 100, 3);
@@ -188,7 +189,7 @@
     const antiValue = antiActive ? Number(anti.value) : 6;
     flag(Number.isInteger(antiValue) && antiValue >= 2 && antiValue <= 6, 'Anti threshold must be 2+ through 6+.');
     if (antiActive) effects.push('Anti-' + anti.target + ' · critical wounds on natural ' + antiValue + '+ (§24.03)');
-    if (has('Precision')) warnings.push('Precision needs a visible Character allocation group. Set up that group manually; overflow to bodyguards is unavailable.');
+    if (has('Precision') && !c.defensiveGroups) warnings.push('Precision needs a visible Character allocation group. Set up that group manually; overflow to bodyguards is unavailable.');
     const critHit = bounded('critHit', 2, 6, 6);
     const critWound = Math.min(bounded('critWound', 2, 6, 6), antiValue);
     const hitFloor = indirect ? c.stationary && c.spotter ? 4 : 6 : 2;
@@ -223,14 +224,49 @@
     if (c.note) effects.push('Manual effect · ' + c.note);
     if (hitMod || woundMod) effects.push('Net roll modifiers after caps · hit ' + hitMod + ', wound ' + woundMod + ' (§02.02.01)');
     const hazard = has('Hazardous') && !blocked ? weaponCount : 0;
+    const groups = parseDefensiveGroups(c.defensiveGroups, c.saveMod, armour - Math.max(2, num(c.save, 3) - num(c.saveMod)));
+    if (groups.length && groups.length !== models) throw Error('Defensive group counts must add up to Remaining models.');
+    if (groups.length && starts < groups.length) throw Error('Select Targets count cannot be smaller than the defensive groups.');
+    const selectedCharacter = has('Precision') && c.precisionTarget ? Number(c.precisionTarget) : 0;
+    if (selectedCharacter && (!Number.isInteger(selectedCharacter) || !groups[selectedCharacter - 1]?.character || !c.precisionVisible)) {
+      throw Error('Precision requires a selected visible Character group.');
+    }
+    if (groups.length) effects.push('Mixed groups · ordered saves and per-model Feel No Pain. Probability uses seeded simulation.');
+    if (selectedCharacter) effects.push('Precision · Character group ' + selectedCharacter + ' receives attacks first (§24.28).');
     return {
+      groups, selectedCharacter,
       c, hit, woundRoll, save, armour, inv, wound, skill, effects, warnings, blocked, torrent, lethal, dev,
       hitReroll, woundReroll, sustainedExpr, sustained, attacks, damage, attackPmf, damagePmf,
-      weaponCount, models, wounds, hp, first, fnp, hazard,
+      weaponCount, models, wounds, hp: groups.length ? groups.reduce((total, g) => total + g.hp, 0) : hp, first, fnp, hazard,
       hazardDamage: c.hazardVehicle ? 3 : 1,
       hitNeeded: torrent ? 0 : d6.find(d => hit(d)) || 7,
       woundNeeded: d6.find(d => woundRoll(d)) || 7,
     };
+  }
+
+  // One row per model, in the defender's allocation order.
+  function parseDefensiveGroups(text, saveMod, penetration) {
+    if (String(text || '').length > 10000) throw Error('Defensive group input is too long.');
+    if (!String(text || '').trim()) return [];
+    const groups = [];
+    let seenCharacter = false, seenHealthyBodyguard = false, seenHealthyCharacter = false;
+    for (const [index, value] of String(text).trim().split(/\n/).entries()) {
+      const line = value.trim();
+      if (!line) continue;
+      if (!/^\d+(?:\s*,\s*\d+){6}$/.test(line)) throw Error('Enter seven comma-separated numbers per defensive group.');
+      const [count, max, armour, inv, fnp, first, char] = line.split(',').map(Number);
+      if (count < 1 || max < 1 || max > 100 || armour < 2 || armour > 7 || inv === 1 || inv > 6 ||
+          fnp === 1 || fnp > 6 || first < 1 || first > max || char > 1 ||
+          char && (count !== 1 || first < max && seenHealthyCharacter) || !char && (seenCharacter || first < max && seenHealthyBodyguard) ||
+          groups.length + count > 100) throw Error('Check defensive group values and allocation order.');
+      if (char) { seenCharacter = true; seenHealthyCharacter ||= first === max; }
+      else if (first === max || count > 1) seenHealthyBodyguard = true;
+      for (let i = 0; i < count; i++) groups.push({
+        group: index + 1, hp: i === 0 ? first : max, character: Boolean(char), fnp,
+        save: Math.min(Math.max(2, armour - num(saveMod)) + penetration, inv || Infinity),
+      });
+    }
+    return groups;
   }
 
   function takeDamage(remaining, damage, modelWounds, first, total) {
@@ -258,6 +294,7 @@
     return result;
   }
   function calculate(plan, starting = new Map([[plan.hp, 1]])) {
+    if (plan.groups.length) return { method: 'Mixed defenses require simulation', tooComplex: true };
     const [, normalHit, criticalHit] = plan.torrent ? [0, 1, 0] : outcomes(plan.hit, plan.hitReroll);
     const [, normalWound, criticalWound] = outcomes(plan.woundRoll, plan.woundReroll);
     const failed = d6.filter(d => d < plan.save).length / 6;
@@ -349,7 +386,11 @@
   function live(plan, die = secureDie, initial = plan.hp, log = true) {
     const history = [];
     let stage = -1, dice = [], hits = 0, automatic = 0, mortal = 0, failedSaves = 0;
-    let result = { hp: initial, kills: kills(plan, initial), damage: 0, hazard: 0 };
+    const modelHp = plan.groups.length ? (Array.isArray(initial) ? [...initial] : plan.groups.map(g => g.hp)) : null;
+    const sumHp = values => values.reduce((sum, hp) => sum + hp, 0);
+    const initialHp = modelHp ? sumHp(modelHp) : initial;
+    let result = { hp: initialHp, kills: modelHp ? modelHp.filter(hp => !hp).length : kills(plan, initialHp), damage: 0, hazard: 0 };
+    if (modelHp) result.modelHp = modelHp;
     const actions = ['Roll attacks', 'Roll hits', 'Roll wounds', 'Roll saving throws', 'Roll Feel No Pain', 'Resolve damage and casualties'];
     function note(label, values) { if (log) history.push({ label, values: [...values] }); }
     function rolls(count, classifier, reroll) {
@@ -402,23 +443,46 @@
         woundCount = automatic + dice.filter(d => d.outcome).length;
         if (mortal) note('Devastating wounds bypass saves', [mortal]);
         dice = rolls(woundCount - mortal, d => Number(d >= plan.save), '');
+        if (modelHp) {
+          dice.sort((a,b) => a.face - b.face);
+          for (const d of dice) d.outcome = undefined;
+        }
         note('Saves', dice.map(d => d.face));
       } else if (stage === 4) {
-        failedSaves = dice.filter(d => !d.outcome).length;
-        let hp = initial;
-        pending = Array.from({ length: failedSaves + mortal }, (_, index) => index < failedSaves ? 'Normal damage' : 'Devastating damage');
+        const saveDice = dice;
+        failedSaves = modelHp ? 0 : saveDice.filter(d => !d.outcome).length;
+        let hp = initialHp;
+        pending = modelHp ? [...saveDice, ...Array(mortal).fill(null)] :
+          [...Array(failedSaves).fill({}), ...Array(mortal).fill(null)];
         const fnpDice = [];
-        for (const label of pending) {
+        for (const saveDie of pending) {
           if (!hp) break;
+          const preferred = modelHp && plan.selectedCharacter ? plan.groups.findIndex((g, i) =>
+            g.group === plan.selectedCharacter && g.character && modelHp[i] > 0) : -1;
+          const target = modelHp ? (preferred >= 0 ? preferred : modelHp.findIndex(w => w > 0)) : -1;
+          const group = plan.groups[target];
+          if (group && saveDie) {
+            saveDie.outcome = Number(saveDie.face >= group.save);
+            note('Save against group ' + group.group + ' (' + group.save + '+)', [saveDie.face, saveDie.outcome ? 'passed' : 'failed']);
+            if (saveDie.outcome) continue;
+            failedSaves++;
+          }
           const rolled = rollExpression(plan.c.damage, die);
           const amount = plan.damage(rolled.value);
-          const prevention = plan.fnp ? rolls(amount, d => Number(d >= plan.fnp), '') : [];
+          const threshold = group?.fnp ?? plan.fnp;
+          const prevention = threshold ? rolls(amount, d => Number(d >= threshold), '') : [];
           fnpDice.push(...prevention);
-          hp = takeDamage(hp, amount - prevention.filter(d => d.outcome).length, plan.wounds, plan.first, plan.hp);
-          note(label, [...rolled.dice, '= ' + amount, 'FNP', ...prevention.map(d => d.face)]);
+          const loss = amount - prevention.filter(d => d.outcome).length;
+          if (modelHp) {
+            const applied = Math.min(modelHp[target], loss);
+            modelHp[target] -= applied;
+            hp -= applied;
+          } else hp = takeDamage(hp, loss, plan.wounds, plan.first, plan.hp);
+          note((saveDie ? 'Normal damage' : 'Devastating damage') + (group ? ' · group ' + group.group : ''),
+            [...rolled.dice, '= ' + amount, 'FNP', ...prevention.map(d => d.face)]);
         }
         dice = fnpDice;
-        result = { ...result, hp, kills: kills(plan, hp), damage: initial - hp };
+        result = { ...result, hp, kills: modelHp ? modelHp.filter(w => !w).length : kills(plan, hp), damage: initialHp - hp };
       } else {
         dice = rolls(plan.hazard, d => Number(d > 2), '');
         result.hazard = dice.filter(d => !d.outcome).length * plan.hazardDamage;
@@ -445,12 +509,18 @@
     const initial = plans[0], state = new Map(), die = seededDie(seed);
     const cost = plans.reduce((a, p) => a + p.weaponCount * Math.max(...Array.from(p.attackPmf.keys(), p.attacks)), 0);
     if (samples * cost > 8_000_000) throw Error('Use fewer samples for this attack pool.');
+    const casualties = new Map();
     for (let i = 0; i < samples; i++) {
-      let hp = initial.hp;
-      for (const plan of plans) hp = live(plan, die, hp, false).finish().hp;
-      add(state, hp, 1 / samples);
+      let remaining = initial.hp, rolled;
+      for (const plan of plans) {
+        rolled = live(plan, die, remaining, false).finish();
+        remaining = rolled.modelHp || rolled.hp;
+      }
+      add(state, rolled.hp, 1 / samples);
+      add(casualties, rolled.kills, 1 / samples);
     }
-    return summarize(initial, state, {}, 'Monte Carlo · ' + samples + ' samples · seed ' + seed);
+    const result = summarize(initial, state, {}, 'Monte Carlo · ' + samples + ' samples · seed ' + seed);
+    return { ...result, casualties, expectedKills: mean(casualties) };
   }
   const api = { source, definitions, example, keyword, weaponPhase, woundThreshold, pmf, compile, calculate, live, simulate, seededDie };
   if (typeof module === 'object') module.exports = api;

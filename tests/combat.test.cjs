@@ -116,3 +116,34 @@ test('older catalogue mixed tables classify weapon profiles by Melee range', () 
   assert.equal(e.weaponPhase({ kind: 'ranged', range: 'Melee' }), 'melee');
   assert.equal(e.weaponPhase({ kind: 'ranged', range: '24"' }), 'ranged');
 });
+
+test('mixed save dice resolve lowest first against the current model', () => {
+  const p = plan({ attacks: 2, targets: 2, ap: 0, damage: 3, keywords: ['Torrent'],
+    defensiveGroups: '1,2,6,0,0,1,0\n1,4,2,0,0,4,0' });
+  const dice = [6, 6, 2, 1];
+  const result = e.live(p, () => dice.shift()).finish();
+  assert.deepEqual(result.modelHp, [0, 4]);
+  assert.equal(result.damage, 1);
+  assert.equal(result.kills, 1);
+  assert.equal(e.calculate(p).tooComplex, true);
+});
+
+test('Precision targets visible Character then returns to bodyguard without spillover', () => {
+  const p = plan({ attacks: 2, targets: 2, ap: 0, damage: 4, keywords: ['Precision'],
+    defensiveGroups: '1,3,6,0,0,3,0\n1,2,4,2,0,2,1', precisionTarget: 2, precisionVisible: true });
+  const dice = [6, 6, 6, 6, 3, 1];
+  assert.deepEqual(e.live(p, () => dice.shift()).finish().modelHp, [0, 0]);
+  assert.throws(() => plan({ ...p.c, precisionVisible: false }), /visible Character/);
+});
+
+test('mixed groups use model-specific Feel No Pain and keep state across weapons', () => {
+  const p = plan({ attacks: 1, targets: 2, ap: 0, damage: 2, keywords: ['Torrent'],
+    defensiveGroups: '1,1,7,0,0,1,0\n1,3,6,0,5,3,0' });
+  const first = e.live(p, () => 6).finish();
+  assert.deepEqual(first.modelHp, [0, 3]);
+  const dice = [6, 1, 6, 2];
+  assert.deepEqual(e.live(p, () => dice.shift(), first.modelHp).finish().modelHp, [0, 2]);
+  const seeded = e.simulate([p,p], 500,42);
+  assert.deepEqual(seeded.casualties,e.simulate([p,p],500,42).casualties);
+  assert.throws(() => plan({ models: '' }), /eligible attacking models/);
+});

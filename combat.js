@@ -70,6 +70,8 @@
     ['targets', 'Remaining models'], ['toughness', 'Toughness'], ['save', 'Armour save (7 = none)'], ['inv', 'Invulnerable save (0 = none)'],
     ['wounds', 'Wounds per model'], ['firstWounds', 'First model wounds remaining (blank = full)'], ['fnp', 'Feel No Pain (0 = none)'],
     ['targetKeywords', 'Target keywords, comma-separated', 'text'],
+    ['defensiveGroups', 'Mixed defenses: count,wounds,save,invulnerable,FNP,first model wounds,Character (1/0). One group per line.', 'textarea'],
+    ['precisionTarget', 'Precision Character group number', 'number'], ['precisionVisible', 'Selected Character is visible', 'check'],
   ];
   const when = (ph, ...keywords) => c => c.phase === ph && (!keywords.length || keywords.some(k => c.keywords.some(x => x.name === k)));
   const conditions = [
@@ -112,10 +114,10 @@
   function controls(id, rows) {
     for (const [key, label, kind = 'number', show] of rows) {
       const wrap = el('label', label);
-      const control = el(Array.isArray(kind) ? 'select' : 'input');
+      const control = el(Array.isArray(kind) ? 'select' : kind === 'textarea' ? 'textarea' : 'input');
       if (Array.isArray(kind)) for (const [v, label] of kind) control.add(new Option(label, v));
       else if (kind === 'check') { control.type = 'checkbox'; wrap.className = 'combat-check'; }
-      else { control.type = kind === 'decimal' ? 'number' : kind; control.step = kind === 'decimal' ? 'any' : '1'; }
+      else if (kind !== 'textarea') { control.type = kind === 'decimal' ? 'number' : kind; control.step = kind === 'decimal' ? 'any' : '1'; }
       control.oninput = () => {
         if (key === 'phase') selectWeapons(true);
         updateConditions();
@@ -336,6 +338,13 @@
     if ($('weapon').value === '' || !weapon) { originalKeywords = []; return; }
     const num = text => /^-?\d+/.test(String(text)) ? Number(String(text).match(/^-?\d+/)[0]) : '';
     const range = num(weapon.range);
+    const matching = (sourceUnit.unit.wargear || []).filter(item => clean(typeof item === 'string' ? item : item.item) === clean(weapon.name));
+    const allocations = matching.reduce((count, item) => count + (typeof item === 'string' ? 1 : Number(item.quantity) || 0), 0);
+    // Recorded equipment quantities are useful hints. They do not certify eligible bearers or casualties.
+    fill({ models: allocations ? Math.min(sourceUnit.unit.models || 1, allocations) : '' });
+    $('equipment').textContent = allocations
+      ? allocations + ' matching saved equipment selections. Confirm eligible surviving bearers and copies per model.'
+      : 'Enter the number of surviving models carrying this weapon. The roster has no explicit bearer count for this profile.';
     fill({ attacks: weapon.a, skill: weapon.skill === '-' ? '-' : num(weapon.skill),
       strength: num(weapon.s), ap: num(weapon.ap), damage: weapon.d, range });
     originalKeywords = (weapon.keywords || []).map(engine.keyword);
@@ -361,7 +370,7 @@
     const p = record?.profile?.stats?.[Number($('model-profile').value)];
     const threshold = v => /^\d\+?$/.test(String(v)) ? Number(String(v)[0]) : 0;
     if (p) {
-      fill({ toughness: Number(p.t), save: threshold(p.sv) || 7, inv: threshold(p.inv),
+      fill({ defensiveGroups: '', precisionTarget: '', precisionVisible: false, toughness: Number(p.t), save: threshold(p.sv) || 7, inv: threshold(p.inv),
         wounds: Number(p.w), firstWounds: '', targets: record.unit.models || 1, fnp: 0,
         targetKeywords: record.profile.keywords?.join(', ') || '',
         targetVehicle: record.profile.keywords?.some(tag => ['vehicle', 'monster'].includes(clean(tag))) });
@@ -442,7 +451,7 @@
           ['Attacks', fmt(stats.attacks)], ['Hits · ' + (plan.torrent ? 'automatic' : threshold(plan.hitNeeded)), fmt(stats.hits)],
           ['Critical hits', fmt(stats.criticalHits)], ['Wounds · ' + threshold(plan.woundNeeded), fmt(stats.wounds)],
           ['Critical wounds', fmt(stats.criticalWounds)],
-          ['Failed saves · ' + threshold(plan.save, 'No save'), fmt(stats.failedSaves)],
+          ['Failed saves · ' + (plan.groups.length ? 'per group' : threshold(plan.save, 'No save')), fmt(stats.failedSaves)],
           ['Unsaved damage before overkill', fmt(stats.rawDamage)],
           ['Expected Hazardous self mortal wounds', fmt(stats.expectedHazard)],
         ]);
@@ -479,7 +488,7 @@
     parent.append(el('h4', active.label + ' → target ' + active.slot));
     stat(parent, [
       ['Hit target', active.plan.torrent ? 'Automatic' : threshold(active.plan.hitNeeded)],
-      ['Wound target', threshold(active.plan.woundNeeded)], ['Save target', threshold(active.plan.save, 'No save')],
+      ['Wound target', threshold(active.plan.woundNeeded)], ['Save target', (active.plan.groups.length ? 'Per group' : threshold(active.plan.save, 'No save'))],
       ...Object.entries(roll.totals).map(([k, v]) => [k, v]),
       ['Wounds removed', roll.result.damage], ['Models destroyed', roll.result.kills],
       ['Hazardous self mortal wounds', roll.result.hazard],
@@ -511,7 +520,7 @@
     parent.append(dice);
     for (const text of [...active.plan.effects, ...active.plan.warnings]) parent.append(el('p', text, 'combat-note'));
     for (const [slot, hp] of Object.entries(liveStates)) {
-      parent.append(el('p', 'Target ' + slot + ' · ' + hp + ' wounds remaining after previous weapon profiles.'));
+      parent.append(el('p', 'Target ' + slot + ' · ' + (Array.isArray(hp) ? hp.reduce((sum, value) => sum + value, 0) : hp) + ' wounds remaining after previous weapon profiles.'));
     }
     const history = el('details');
     history.open = true;
@@ -610,7 +619,7 @@
     'new-roll'() { resetRoll(); render(); },
     'next-weapon'() {
       const previous = rollQueue[rollIndex];
-      liveStates[previous.slot] = roll.result.hp;
+      liveStates[previous.slot] = roll.result.modelHp || roll.result.hp;
       completedRolls.push({ label: previous.label + ' → target ' + previous.slot, history: [...roll.history] });
       const entry = rollQueue[++rollIndex];
       roll = engine.live(entry.plan, undefined, liveStates[entry.slot] ?? entry.plan.hp);
