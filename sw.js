@@ -1,18 +1,18 @@
 'use strict';
 
-const cacheName = 'forgeroster-shell-v1';
+const cacheName = 'forgeroster-shell-v2';
 const root = new URL(self.registration.scope);
 const shell = [
-  './', './index.html', './app.css', './app.js', './manifest.webmanifest',
-  './icons/icon-192.png', './icons/icon-512.png', './factions.js', './setup.js?v=3',
-  './roster-storage.js', './validation.js', './army-setup.js', './rules-builder.js', './rules-library.js?v=2', './rule-links.js?v=1',
-  './source-manager.js?v=1', './auth-config.js', './cloud.js?v=1', './auth.js?v=2',
+  './', './index.html', './app.css?v=20261114.2', './app.js?v=20261114.2', './manifest.webmanifest?v=20261114.2',
+  './icons/icon-192.png', './icons/icon-512.png', './factions.js?v=20261114.2', './setup.js?v=20261114.2',
+  './roster-storage.js?v=20261114.2', './validation.js?v=20261114.2', './army-setup.js?v=20261114.2', './rules-builder.js?v=20261114.2', './rules-library.js?v=20261114.2', './rule-links.js?v=20261114.2',
+  './source-manager.js?v=20261114.2', './auth-config.js?v=20261114.2', './cloud.js?v=20261114.2', './auth.js?v=20261114.2',
   './data/mfm.json', './data/rules/bundled.json',
 ];
 const shellPaths = new Set(shell.map(path => new URL(path, root).pathname));
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(cacheName).then(cache => cache.addAll(shell)));
+  event.waitUntil(caches.open(cacheName).then(cache => cache.addAll(shell.map(path => new Request(new URL(path, root), { cache: 'reload' })))));
 });
 
 self.addEventListener('activate', event => {
