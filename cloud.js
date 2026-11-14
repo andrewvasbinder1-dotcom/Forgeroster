@@ -32,5 +32,7 @@ document.addEventListener('fr-roster-saved',queue);
 document.addEventListener('fr-roster-created',async e=>{if(!ready)return;try{await createRoster(e.detail)}catch(err){status('Could not create cloud roster: '+err.message,true)}});
 document.addEventListener('fr-user-signed-in',e=>init(e.detail.client,e.detail.user));
 document.addEventListener('fr-user-signed-out',()=>{clearTimeout(timer);ready=false;active=null;user=null;localStorage.removeItem(key);localStorage.removeItem('fr-owner');wrap.hidden=true});
+window.frCreateCloudRoster=async r=>{if(!ready||!user)throw Error('Cloud storage is not ready');return createRoster(r)};
+if(window.frSupabaseClient&&window.frAuthUser)init(window.frSupabaseClient,window.frAuthUser);
 window.addEventListener('pagehide',()=>{if(timer)clearTimeout(timer)});
 })();
