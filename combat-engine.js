@@ -112,8 +112,10 @@
       flag(Number.isInteger(n) && n >= 0 && n <= 20, name + ' needs a whole-number value from 0 to 20.');
       return n;
     };
-    flag(c.models !== '', 'Enter the number of eligible attacking models.');
-    const weaponCount = bounded('models', 1, 100, 1) * bounded('copies', 1, 20, 1);
+    const exactCount = c.weaponCountOverride != null && c.weaponCountOverride !== '';
+    flag(exactCount || c.models !== '', 'Enter the number of eligible attacking models.');
+    const weaponCount = exactCount ? bounded('weaponCountOverride', 0, 2000, 0) :
+      bounded('models', 1, 100, 1) * bounded('copies', 1, 20, 1);
     const models = bounded('targets', 1, 100, 1);
     const wounds = bounded('wounds', 1, 100, 3);
     const first = bounded('firstWounds', 1, wounds, wounds);

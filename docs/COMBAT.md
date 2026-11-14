@@ -51,3 +51,13 @@ A, load it from a second session for A, then verify that B cannot see or load it
 The static Pages deploy does not run SQL migrations.
 
 Run `node --test tests/*.test.cjs scripts/test-mfm.mjs`.
+
+### Model weapon loadouts
+
+Open **Model weapon loadout** on a roster unit. Record each model and its
+weapon profiles, including repeated copies, then save. Mark lost models as
+casualties. The calculator uses the recorded total number of surviving
+copies only when every model is recorded. Clear the override for a manual
+estimate. A loadout is combat input, separate from verified army equipment
+restrictions. For weapons with alternative profiles, select only the profile
+you intend to resolve. Unit size changes ask before clearing the loadout.
