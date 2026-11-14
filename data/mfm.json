@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 2,
+  "meta": {
+    "version": "unpopulated",
+    "lastUpdated": "2026-11-14",
+    "source": "https://mfm.warhammer-community.com/en",
+    "status": "Faction directory only; no points imported or verified"
+  },
+  "factions": [
+    {
+      "name": "Adepta Sororitas",
+      "slug": "adepta-sororitas",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Adeptus Custodes",
+      "slug": "adeptus-custodes",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Adeptus Mechanicus",
+      "slug": "adeptus-mechanicus",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Aeldari",
+      "slug": "aeldari",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Astra Militarum",
+      "slug": "astra-militarum",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Black Templars",
+      "slug": "black-templars",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Blood Angels",
+      "slug": "blood-angels",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Chaos Daemons",
+      "slug": "chaos-daemons",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Chaos Knights",
+      "slug": "chaos-knights",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Chaos Space Marines",
+      "slug": "chaos-space-marines",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Chaos Titan Legions",
+      "slug": "chaos-titan-legions",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Dark Angels",
+      "slug": "dark-angels",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Death Guard",
+      "slug": "death-guard",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Deathwatch",
+      "slug": "deathwatch",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Drukhari",
+      "slug": "drukhari",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Emperor’s Children",
+      "slug": "emperors-children",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Genestealer Cults",
+      "slug": "genestealer-cults",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Grey Knights",
+      "slug": "grey-knights",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Imperial Agents",
+      "slug": "imperial-agents",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Imperial Knights",
+      "slug": "imperial-knights",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Leagues of Votann",
+      "slug": "leagues-of-votann",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Necrons",
+      "slug": "necrons",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Orks",
+      "slug": "orks",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Space Marines",
+      "slug": "space-marines",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Space Wolves",
+      "slug": "space-wolves",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "T’au Empire",
+      "slug": "tau-empire",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Thousand Sons",
+      "slug": "thousand-sons",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Titan Legions",
+      "slug": "titan-legions",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "Tyranids",
+      "slug": "tyranids",
+      "units": [],
+      "detachments": []
+    },
+    {
+      "name": "World Eaters",
+      "slug": "world-eaters",
+      "units": [],
+      "detachments": []
+    }
+  ]
+}
