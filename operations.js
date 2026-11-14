@@ -48,7 +48,10 @@
         <label>Severity<select id="frAdminSeverity"><option value="">All</option>${select(severity)}</select></label>
         <label>Status<select id="frAdminFilter"><option value="">All</option>${select(states)}</select></label></div>
         <button id="frAdminReload">Refresh reports</button><div id="frAdminReports"></div>
-        <h3>Rules and points</h3><p><a href="./data/verification.json">Download points verification report</a></p>
+        <h3>Account directory</h3><p>Account UUIDs, sign-in dates, roster counts and roles.</p><label>Find by UUID<input id="frAdminUser" type="search" maxlength="36"></label>
+        <button id="frAdminFindUsers">Load accounts</button><div id="frAdminUsers" role="status"></div>
+        <h3>Audit log</h3><button id="frAdminLoadAudit">Load recent audit records</button><div id="frAdminAudit" role="status"></div>
+        <h3>Rules and points</h3><p><a href="./data/verification.json">View points provenance and verification status</a></p>
       </div>
     </section>`;
   document.querySelector('main').before(root);
@@ -68,6 +71,9 @@
     $('frAdminPanel').hidden = true;
     $('frAdminReports').replaceChildren();
     $('frAdminStats').replaceChildren();
+    $('frAdminUsers').replaceChildren();
+    $('frAdminAudit').replaceChildren();
+    $('frAdminUser').value = '';
     $('frBugStatus').textContent = '';
     $('frBugForm').reset();
     if (document.body.dataset.frView === 'admin') loadAdmin();
@@ -211,6 +217,24 @@
     }
     if (!list.children.length) list.append(element('p','No matching reports.'));
   }
+  async function adminRows(id, rpc, parameters, present) {
+    const actor = session;
+    const output = $(id);
+    if (!actor) return;
+    output.textContent = 'Loading…';
+    try {
+      const { data, error } = await actor.client.rpc(rpc, parameters);
+      if (actor !== session) return;
+      if (error) throw Error(error.message);
+      output.replaceChildren();
+      for (const row of data || []) output.append(element('p', present(row)));
+      if (!output.children.length) output.textContent = 'No matching records.';
+    } catch (error) { if (actor === session) output.textContent = error.message; }
+  }
+  $('frAdminFindUsers').onclick = () => adminRows('frAdminUsers','fr_admin_users',{ search_uuid: $('frAdminUser').value.trim() },
+    row => [row.id, row.role, row.status, row.created_at, row.last_sign_in_at || 'Never signed in', row.rosters + ' rosters'].join(' · '));
+  $('frAdminLoadAudit').onclick = () => adminRows('frAdminAudit','fr_admin_audit',{},
+    row => [row.created_at, row.action, row.resource, row.actor || 'Unavailable', JSON.stringify(row.detail)].join(' · '));
   $('frAdminReload').onclick = loadAdmin;
   for (const id of ['frAdminSearch','frAdminCategory','frAdminSeverity','frAdminFilter']) $(id).oninput = renderReports;
 })();

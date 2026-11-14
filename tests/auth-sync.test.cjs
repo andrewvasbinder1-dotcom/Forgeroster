@@ -148,3 +148,23 @@ test('device rosters and cloud sessions isolate accounts and preserve conflictin
   await one.ids.get('frAuthForm').onsubmit({preventDefault() {}});
   assert.equal(one.ids.get('frAuthGate').hidden,true);
 });
+
+test('keep both saves the conflicted draft without overwriting the cloud original', async () => {
+  db.clear();
+  const first = site();
+  await first.signIn('conflict@example.com');
+  const storage = first.window.frRosterStorage;
+  await first.window.frCreateCloudRoster({name:'Original',faction:'Deathwatch',units:[],limit:2000});
+  const second = site();
+  await second.signIn('conflict@example.com');
+  const remote = second.window.frRosterStorage;
+  remote.write({...remote.read(),name:'Remote edit'});
+  await second.window.frFlushCloudRoster();
+  storage.write({...storage.read(),name:'Device edit'});
+  await assert.rejects(first.window.frFlushCloudRoster(), /changed/);
+  assert.equal(first.ids.get('frKeepBoth').hidden,false);
+  first.ids.get('frKeepBoth').onclick();
+  await sleep(15);
+  assert.equal(storage.read().name,'Device edit (local copy)');
+  assert.deepEqual([...db.values()].map(row => row.name).sort(),['Device edit (local copy)','Remote edit']);
+});
