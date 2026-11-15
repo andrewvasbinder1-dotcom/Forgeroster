@@ -1,14 +1,14 @@
 'use strict';
 
-const cacheName = 'forgeroster-shell-v12';
+const cacheName = 'forgeroster-shell-v13';
 const root = new URL(self.registration.scope);
 const shell = [
-  './', './index.html', './app.css?v=20261114.12', './app.js?v=20261114.12', './manifest.webmanifest?v=20261114.12',
-  './icons/icon-192.png', './icons/icon-512.png', './factions.js?v=20261114.12', './setup.js?v=20261114.12',
-  './roster-storage.js?v=20261114.12', './validation.js?v=20261114.12', './army-setup.js?v=20261114.12', './weapon-bearers.js?v=20261114.12', './rules-builder.js?v=20261114.12', './rules-library.js?v=20261114.12', './rule-links.js?v=20261114.12',
-  './source-manager.js?v=20261114.12', './auth-config.js?v=20261114.12', './cloud.js?v=20261114.12', './auth.js?v=20261114.12',
-  './combat.css?v=20261114.12', './combat-engine.js?v=20261114.12', './combat.js?v=20261114.12',
-  './production.css?v=20261114.12', './operations.js?v=20261114.12', './brand/crest.svg', './icons/apple-touch.png', './icons/maskable-512.png',
+  './', './index.html', './app.css?v=20261114.13', './app.js?v=20261114.13', './manifest.webmanifest?v=20261114.13',
+  './icons/icon-192.png', './icons/icon-512.png', './factions.js?v=20261114.13', './setup.js?v=20261114.13',
+  './roster-storage.js?v=20261114.13', './validation.js?v=20261114.13', './army-setup.js?v=20261114.13', './weapon-bearers.js?v=20261114.13', './rules-builder.js?v=20261114.13', './rules-library.js?v=20261114.13', './rule-links.js?v=20261114.13',
+  './source-manager.js?v=20261114.13', './auth-config.js?v=20261114.13', './cloud.js?v=20261114.13', './auth.js?v=20261114.13',
+  './combat.css?v=20261114.13', './combat-engine.js?v=20261114.13', './combat.js?v=20261114.13',
+  './production.css?v=20261114.13', './operations.js?v=20261114.13', './brand/crest.svg', './icons/apple-touch.png', './icons/maskable-512.png',
   './data/mfm.json', './data/rules/bundled.json',
 ];
 const shellUrls = new Set(shell.map(path => new URL(path, root).href));

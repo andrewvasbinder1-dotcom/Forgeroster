@@ -89,3 +89,5 @@ casualty and bearer changes flag pending attacks for review. For the active
 weapon, changes to combat inputs also flag the snapshot. Select that weapon
 before recalculating it, keep the original snapshot explicitly, or remove the
 attack. Finished dice rolls remain in the session history when inputs change.
+
+Saved scenarios retain up to 60 lines from completed live rolls. Long dice rows are abbreviated. Loading a scenario restores that history for review.
