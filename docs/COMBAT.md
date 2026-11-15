@@ -61,3 +61,18 @@ copies only when every model is recorded. Clear the override for a manual
 estimate. A loadout is combat input, separate from verified army equipment
 restrictions. For weapons with alternative profiles, select only the profile
 you intend to resolve. Unit size changes ask before clearing the loadout.
+
+### Scenario casualties
+
+Select a roster attacker and use **Models Remaining** for a quick count.
+With a uniform recorded loadout, changing ten models to nine immediately
+removes one model's weapons. With mixed equipment, open **Manage Casualties**
+to mark the lost bearer or enter a confirmed surviving weapon count. Wounded
+models retain their weapons and their remaining wounds are saved for
+reference. Conditional abilities keyed to wounds still use the modifier
+controls. Choose a standard melee weapon for each model with alternatives;
+Extra Attacks profiles can be queued separately.
+
+Scenario saves include model status, equipment and remaining wounds. Roster
+data stays unchanged. Queued attack entries retain their configured counts;
+requeue them after changing casualties to use the new counts.
