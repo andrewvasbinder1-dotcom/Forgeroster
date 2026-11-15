@@ -7,6 +7,7 @@ from contextlib import contextmanager
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
 import os
+import re
 import sys
 
 from playwright.sync_api import expect, sync_playwright
@@ -52,12 +53,25 @@ def verify(url):
         ).fill("Hearthkyn Warriors")
         add = page.get_by_role("button", name="Add Hearthkyn Warriors", exact=True)
         expect(add).to_be_enabled()
+        page.locator("#frUnitsAvailable").get_by_text("Unit profile", exact=True).first.click()
+        page.locator("#frUnitsAvailable").get_by_role("button", name="Infantry", exact=True).first.click()
+        expect(page.get_by_role("dialog", name="Infantry")).to_contain_text("Classification reference")
+        page.get_by_role("button", name="Close rule reference").click()
         add.click()
+        roster = page.locator("#frRosterUnits")
+        roster.get_by_text("Unit profile", exact=True).first.click()
+        roster.get_by_role("button", name="Infantry", exact=True).first.click()
+        expect(page.get_by_role("dialog", name="Infantry")).to_be_visible()
+        page.keyboard.press("Escape")
         expect(page.locator("#frRosterUnits")).to_contain_text("Hearthkyn Warriors")
         expect(page.locator("#frArmyTotal")).not_to_have_text("0 / 2000 pts")
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
         page.get_by_role("button", name="Rules & datasheets").click()
         expect(page.get_by_role("heading", name="Rules & Keywords Library")).to_be_visible()
+        page.locator("#frRuleSearch").fill("rapid fire")
+        page.locator("#frRuleResults").get_by_role("button", name="Rapid Fire", exact=True).click()
+        expect(page.get_by_role("dialog", name="Rapid Fire")).to_contain_text("half the listed range")
+        page.keyboard.press("Escape")
         page.go_back()
         expect(page.locator("#frRosterUnits")).to_contain_text("Hearthkyn Warriors")
         page.go_forward()
@@ -110,6 +124,27 @@ def verify(url):
         page.get_by_role("button", name="Load scenario", exact=True).click()
         page.get_by_text("Roll history", exact=True).click()
         assert history.inner_text() == rolled
+        page.get_by_role("button", name="Load example", exact=True).click()
+        page.locator("#combat-count").locator("..").click()
+        page.get_by_label("Rapid Fire", exact=True).check()
+        reference = page.get_by_role("button", name="Rapid Fire 1", exact=True)
+        if width < 768:
+            reference.tap()
+        else:
+            reference.press("Enter")
+        popup = page.get_by_role("dialog", name="Rapid Fire 1")
+        expect(popup).to_contain_text("Active · Target distance 12")
+        expect(popup.get_by_role("link", name="Open source reference")).to_have_attribute(
+            "href", re.compile(r"^https://assets\.warhammer-community\.com/")
+        )
+        page.keyboard.press("Escape")
+        expect(popup).to_have_count(0)
+        expect(reference).to_be_focused()
+        page.get_by_text("Modifiers & abilities", exact=True).click()
+        page.get_by_role("spinbutton", name="Distance to target (inches)").fill("13")
+        reference.click()
+        expect(popup).to_contain_text("Inactive · Target distance 13")
+        popup.get_by_role("button", name="Close rule reference").click()
         page.get_by_role("button", name="Report a bug").click()
         expect(page.get_by_role("heading", name="Report a bug")).to_be_visible()
         page.goto(url + "#admin")

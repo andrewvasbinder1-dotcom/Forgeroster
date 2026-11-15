@@ -1,14 +1,14 @@
 'use strict';
 
-const cacheName = 'forgeroster-shell-v14';
+const cacheName = 'forgeroster-shell-v15';
 const root = new URL(self.registration.scope);
 const shell = [
-  './', './index.html', './app.css?v=20261114.14', './app.js?v=20261114.14', './manifest.webmanifest?v=20261114.14',
-  './icons/icon-192.png', './icons/icon-512.png', './factions.js?v=20261114.14', './setup.js?v=20261114.14',
-  './roster-storage.js?v=20261114.14', './validation.js?v=20261114.14', './army-setup.js?v=20261114.14', './weapon-bearers.js?v=20261114.14', './rules-builder.js?v=20261114.14', './rules-library.js?v=20261114.14', './rule-links.js?v=20261114.14',
-  './source-manager.js?v=20261114.14', './auth-config.js?v=20261114.14', './cloud.js?v=20261114.14', './auth.js?v=20261114.14',
-  './combat.css?v=20261114.14', './combat-engine.js?v=20261114.14', './combat.js?v=20261114.14',
-  './production.css?v=20261114.14', './operations.js?v=20261114.14', './brand/crest.svg', './icons/apple-touch.png', './icons/maskable-512.png',
+  './', './index.html', './app.css?v=20261114.15', './app.js?v=20261114.15', './manifest.webmanifest?v=20261114.15',
+  './icons/icon-192.png', './icons/icon-512.png', './factions.js?v=20261114.15', './setup.js?v=20261114.15',
+  './roster-storage.js?v=20261114.15', './validation.js?v=20261114.15', './army-setup.js?v=20261114.15', './weapon-bearers.js?v=20261114.15', './rules-builder.js?v=20261114.15', './rules-library.js?v=20261114.15', './rule-links.js?v=20261114.15',
+  './source-manager.js?v=20261114.15', './auth-config.js?v=20261114.15', './cloud.js?v=20261114.15', './auth.js?v=20261114.15',
+  './combat.css?v=20261114.15', './combat-engine.js?v=20261114.15', './combat.js?v=20261114.15', './keyword-reference.js?v=20261114.15',
+  './production.css?v=20261114.15', './operations.js?v=20261114.15', './brand/crest.svg', './icons/apple-touch.png', './icons/maskable-512.png',
   './data/mfm.json', './data/rules/bundled.json',
 ];
 const shellUrls = new Set(shell.map(path => new URL(path, root).href));

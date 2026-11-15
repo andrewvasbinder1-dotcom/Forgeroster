@@ -31,7 +31,12 @@ function profileTable(rows, columns) {
   const body = table.createTBody();
   for (const item of rows) {
     const line = body.insertRow();
-    for (const [, field] of columns) line.insertCell().textContent = item[field] ?? '—';
+    for (const [, field] of columns) {
+      const cell = line.insertCell();
+      if (Array.isArray(item[field])) {
+        for (const keyword of item[field]) cell.append(window.ForgeRosterKeywords.chip(keyword, {source:item.keywordSource}));
+      } else cell.textContent = item[field] ?? '—';
+    }
   }
   wrapper.append(table);
   return wrapper;
@@ -43,7 +48,12 @@ function showUnitProfile(unit, faction) {
   detail.append(node('summary', 'Unit profile'));
   detail.addEventListener('toggle', () => {
     if (!detail.open || detail.children.length > 1) return;
-    if (unit.keywords?.length) detail.append(node('p', unit.keywords.join(' · ')));
+    const references = keywords => {
+      const row = node('div','');
+      for (const keyword of keywords) row.append(window.ForgeRosterKeywords.chip(keyword, {source:unit.datasheetSource}));
+      return row;
+    };
+    if (unit.keywords?.length) detail.append(references(unit.keywords));
     if (unit.stats?.length) {
       detail.append(profileTable(unit.stats, [
         ['Model', 'name'], ['M', 'm'], ['T', 't'], ['Sv', 'sv'], ['W', 'w'],
@@ -52,14 +62,14 @@ function showUnitProfile(unit, faction) {
     }
     if (unit.weapons?.length) {
       const rows = unit.weapons.map(weapon => ({
-        ...weapon, traits: Array.isArray(weapon.keywords) ? weapon.keywords.join(', ') : weapon.keywords,
+        ...weapon, traits: weapon.keywords, keywordSource:unit.datasheetSource,
       }));
       detail.append(profileTable(rows, [
         ['Weapon', 'name'], ['Range', 'range'], ['A', 'a'], ['BS/WS', 'skill'],
         ['S', 's'], ['AP', 'ap'], ['D', 'd'], ['Keywords', 'traits'],
       ]));
     }
-    if (unit.abilityNames?.length) detail.append(node('p', 'Abilities · ' + unit.abilityNames.join(' · ')));
+    if (unit.abilityNames?.length) detail.append(node('p','Abilities'), references(unit.abilityNames));
     if (unit.leads?.length) detail.append(node('p', 'Eligible bodyguards · ' + unit.leads.join(' · ')));
     for (const weapon of unit.weapons || []) {
       const calculate = node('button', 'Calculate ' + weapon.name);
@@ -188,6 +198,7 @@ function drawRoster(roster, faction, sheets, result) {
 
     const attachment = armySetup.attachmentControl(roster, faction, sheets, index);
     if (attachment) details.append(attachment);
+    if (catalogue?.keywords?.length || catalogue?.weapons?.length) details.append(showUnitProfile(catalogue, roster.faction));
     renderEquipment(details, roster, entry, catalogue, sheet);
     renderCombatLoadout(details, roster, entry, catalogue);
     if (catalogue?.weapons?.length) {

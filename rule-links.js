@@ -17,7 +17,7 @@ function displayRule(parent,e){
 const details=el('details');
 details.append(el('summary',e.name+' · '+e.kind),el('p',e.text,'ruletext'));
 if(e.stats)details.append(el('p',Object.entries(e.stats).map(([key,value])=>key+': '+value).join(' · ')));
-for(const keyword of e.keywords||[])details.append(el('span',keyword,'chip'));
+for(const keyword of e.keywords||[])details.append(window.ForgeRosterKeywords.chip(keyword));
 details.append(el('p',(e.references||[]).join(' · ')||e._pack.title+' · '+e._pack.version,'muted'));
 parent.append(details);
 }
@@ -27,7 +27,7 @@ info.append(el('p',scoped.length+' matching rule entries · '+r.faction,'muted')
 const armyRules=scoped.filter(e=>e.kind==='faction-rule'&&!e.unit);
 if(armyRules.length){const section=el('div');section.append(el('h3','Faction rules'));for(const e of armyRules)displayRule(section,e);list.append(section)}
 for(const u of r.units||[]){const card=el('div',undefined,'unit');card.append(el('strong',u.name));const combat=el('button','Combat calculator');combat.onclick=()=>window.frOpenCombat({faction:r.faction,name:u.name,id:u.id});card.append(combat);const sheet=all.find(e=>e.kind==='datasheet'&&norm(e.unit||e.name)===norm(u.name)&&applies(e,r,u));if(!sheet){const updates=scoped.filter(e=>e.kind==='errata'&&e.unit&&applies(e,r,u));if(updates.length){for(const e of updates)displayRule(card,e);list.append(card)}continue}const ds=el('details');ds.append(el('summary','Datasheet · '+sheet._pack.title+' v'+sheet._pack.version));if(sheet.text)ds.append(el('p',sheet.text,'ruletext'));if(sheet.stats&&typeof sheet.stats==='object'){const stats=el('p',Object.entries(sheet.stats).map(([k,v])=>k+': '+v).join(' · '),'muted');ds.append(stats)}card.append(ds);
-for(const keyword of sheet.keywords||[]){const chip=el('span',keyword,'chip');card.append(chip);for(const def of lookup(keyword,all,r,u))displayRule(card,def)}
+for(const keyword of sheet.keywords||[]){const chip=window.ForgeRosterKeywords.chip(keyword);card.append(chip);for(const def of lookup(keyword,all,r,u))displayRule(card,def)}
 for(const ability of sheet.abilities||[]){const linked=lookup(ability,all,r,u);if(!linked.length)card.append(el('p','Missing ability definition: '+ability,'warning'));for(const def of linked)displayRule(card,def)}
 for(const weapon of sheet.weapons||[]){const linked=lookup(weapon,all,r,u);if(!linked.length)card.append(el('p','Missing weapon profile: '+weapon,'warning'));for(const def of linked)displayRule(card,def)}
 for(const rule of all.filter(e=>e.kind!=='datasheet'&&e.unit&&norm(e.unit)===norm(u.name)&&applies(e,r,u)&&!([...(sheet.keywords||[]),...(sheet.abilities||[]),...(sheet.weapons||[])].some(x=>norm(x)===norm(e.name)))))displayRule(card,rule);
