@@ -1,0 +1,40 @@
+name: Staging QA
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { browser: chromium, width: 390 }
+          - { browser: firefox, width: 768 }
+          - { browser: webkit, width: 1280 }
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: node --test tests/*.test.cjs scripts/test-mfm.mjs
+      - run: python -m pip install playwright==1.55.0
+      - run: python -m playwright install --with-deps "$FORGEROSTER_BROWSER"
+        env:
+          FORGEROSTER_BROWSER: ${{ matrix.browser }}
+      - name: Build and test static staging site
+        env:
+          FORGEROSTER_BROWSER: ${{ matrix.browser }}
+          FORGEROSTER_WIDTH: ${{ matrix.width }}
+        run: |
+          mkdir _site
+          cp .nojekyll *.html *.js *.css manifest.webmanifest _site/
+          cp -r data icons brand _site/
+          cd _site
+          python ../tests/browser_smoke.py
