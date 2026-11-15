@@ -12,13 +12,17 @@ const views = [
   ['support', 'Help & account'],
 ];
 
-function showForgeRosterView(view) {
+function showForgeRosterView(view, { replace = false } = {}) {
   document.body.dataset.frView = view;
   for (const button of navigation.querySelectorAll('button')) {
     button.setAttribute('aria-pressed', String(button.dataset.view === view));
   }
   const hash = view === 'builder' ? '' : '#' + view;
-  if (location.hash !== hash) history.replaceState(null, '', location.pathname + location.search + hash);
+  if (location.hash !== hash) {
+    const url = location.pathname + location.search + hash;
+    if (replace) history.replaceState(null, '', url);
+    else history.pushState(null, '', url);
+  }
   document.dispatchEvent(new CustomEvent('fr-view-changed', { detail: view }));
 }
 
@@ -34,7 +38,7 @@ for (const [view, label] of views) {
 document.querySelector('header').after(navigation);
 function openInitialView() {
   const view = location.hash.slice(1);
-  showForgeRosterView(view === 'admin' || views.some(([key]) => key === view) ? view : 'builder');
+  showForgeRosterView(view === 'admin' || views.some(([key]) => key === view) ? view : 'builder', { replace: true });
 }
 window.addEventListener('hashchange', openInitialView);
 document.addEventListener('DOMContentLoaded', openInitialView, { once: true });

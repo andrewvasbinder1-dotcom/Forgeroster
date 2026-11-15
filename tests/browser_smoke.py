@@ -1,4 +1,4 @@
-"""Smoke-test ForgeRoster in Chromium with a mobile viewport.
+"""Smoke-test ForgeRoster across Chromium, Firefox and WebKit.
 
 Run with Python Playwright from the repository root. By default the test
 serves the repository locally. Pass the GitHub Pages URL to test deployment.
@@ -29,11 +29,13 @@ def server():
 
 def verify(url):
     with sync_playwright() as playwright:
-        browser = playwright.chromium.launch(
-            executable_path=os.environ.get("FORGEROSTER_CHROMIUM")
+        engine = os.environ.get("FORGEROSTER_BROWSER", "chromium")
+        browser = getattr(playwright, engine).launch(
+            executable_path=os.environ.get("FORGEROSTER_CHROMIUM") if engine == "chromium" else None
         )
+        width = int(os.environ.get("FORGEROSTER_WIDTH", "390"))
         context = browser.new_context(
-            viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True
+            viewport={"width": width, "height": 844}, has_touch=width < 768
         )
         page = context.new_page()
         errors = []
@@ -56,15 +58,38 @@ def verify(url):
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
         page.get_by_role("button", name="Rules & datasheets").click()
         expect(page.get_by_role("heading", name="Rules & Keywords Library")).to_be_visible()
+        page.go_back()
+        expect(page.locator("#frRosterUnits")).to_contain_text("Hearthkyn Warriors")
+        page.go_forward()
+        expect(page.get_by_role("heading", name="Rules & Keywords Library")).to_be_visible()
+        page.get_by_role("button", name="Combat calculator").click()
+        page.locator("#combat-attacker").select_option(label="My Army · Hearthkyn Warriors")
+        page.locator("#combat-weapon").select_option(label="Autoch-pattern bolter")
+        page.get_by_role("button", name="Remove one remaining model").click()
+        page.get_by_role("spinbutton", name="Total surviving weapons (optional override)").fill("9")
+        expect(page.locator("#combat-strength-summary")).to_contain_text("9 remaining")
+        expect(page.locator("#combat-results")).to_contain_text("18.00")
+        page.get_by_role("button", name="Advanced Mode").click()
+        page.get_by_role("combobox", name="Model 1 status", exact=True).select_option("destroyed")
+        page.get_by_role("button", name="Undo Last Casualty").click()
+        expect(page.locator("#combat-identity")).to_contain_text("Identify 1 more")
+        page.get_by_role("button", name="Quick Mode").click()
+        expect(page.locator("#combat-strength-summary")).to_contain_text("9 remaining")
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth")
+        page.get_by_role("button", name="Report a bug").click()
+        expect(page.get_by_role("heading", name="Report a bug")).to_be_visible()
+        page.goto(url + "#admin")
+        expect(page.locator("#frAdminStatus")).to_contain_text("Sign in with an administrator")
         page.get_by_role("button", name="Army builder").click()
         page.wait_for_function("navigator.serviceWorker.controller !== null")
-        context.set_offline(True)
+        if engine == "chromium":
+            context.set_offline(True)
         page.reload(wait_until="domcontentloaded")
         page.get_by_placeholder("Search faction units").fill("Hearthkyn Warriors")
         expect(page.locator("#frRosterUnits")).to_contain_text("Hearthkyn Warriors")
         expect(page.get_by_role("button", name="Add Hearthkyn Warriors")).to_be_visible()
         assert not errors, errors
-        print("Mobile builder, catalog, navigation, persistence and offline reload passed.")
+        print(f"{engine} {width}px smoke passed.")
 
 
 if __name__ == "__main__":

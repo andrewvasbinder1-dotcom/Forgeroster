@@ -525,7 +525,9 @@
       }
     }
     if (attackerState) {
-      attackerState.id = record.unit.attachedTo || record.unit.id || record.id || '';
+      const rootId = record.unit.attachedTo || record.unit.id;
+      const rosterKey = record.id?.slice(0,record.id.lastIndexOf(':'));
+      attackerState.id = rootId && rosterKey ? rosterKey + ':' + rootId : rootId || record.id || '';
       attackerState.weaponProfiles = weaponProfiles;
     }
     drawStrength(true);
@@ -535,10 +537,8 @@
       'Saved equipment: ' + equipped.join(', ') + '. Confirm the selected profile and number of bearers.' :
       'Confirm the equipped profile and number of bearers. This catalog does not encode default and replacement loadouts.';
     if (record) fill({ models: record.unit.models || 1, copies: 1 });
-    if (record?.profile?.keywords) {
-      const vehicle = record.profile.keywords.some(tag => ['vehicle', 'monster'].includes(clean(tag)));
-      fill({ vehicle, hazardVehicle: vehicle });
-    }
+    const vehicle = record?.profile?.keywords?.some(tag => ['vehicle', 'monster'].includes(clean(tag))) || false;
+    fill({ vehicle, hazardVehicle: vehicle });
     if (requestedWeapon) {
       const matching = record?.profile?.weapons?.find(w => clean(w.name) === clean(requestedWeapon));
       if (matching) fill({ phase: engine.weaponPhase(matching) });

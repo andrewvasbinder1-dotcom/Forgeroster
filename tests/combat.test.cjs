@@ -147,3 +147,18 @@ test('mixed groups use model-specific Feel No Pain and keep state across weapons
   assert.deepEqual(seeded.casualties,e.simulate([p,p],500,42).casualties);
   assert.throws(() => plan({ models: '' }), /eligible attacking models/);
 });
+
+test('Torrent produces ordinary hits and cannot trigger Lethal Hits', () => {
+  const result = calc({ attacks: 6, strength: 1, toughness: 10, save: 7, ap: 0,
+    damage: 1, wounds: 5, keywords: ['Torrent','Lethal Hits'] });
+  near(result.hits, 6);
+  near(result.criticalHits, 0);
+  near(result.wounds, 1);
+  near(result.rawDamage, 1);
+});
+
+test('Twin-linked rerolls failures after applying the net wound modifier', () => {
+  const result = calc({ attacks: 6, strength: 4, toughness: 4, woundMod: 1,
+    keywords: ['Torrent','Twin-Linked'] });
+  near(result.wounds, 6 * (1 - (2 / 6) ** 2));
+});
