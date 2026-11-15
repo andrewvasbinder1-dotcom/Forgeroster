@@ -57,6 +57,9 @@ def verify(url):
         page.locator("#frUnitsAvailable").get_by_role("button", name="Infantry", exact=True).first.click()
         expect(page.get_by_role("dialog", name="Infantry")).to_contain_text("Classification reference")
         page.get_by_role("button", name="Close rule reference").click()
+        page.locator("#frUnitsAvailable").get_by_role("button", name="Hearthkyn Warriors", exact=True).first.click()
+        expect(page.get_by_role("dialog", name="Hearthkyn Warriors")).to_contain_text("Definition unavailable")
+        page.keyboard.press("Escape")
         add.click()
         roster = page.locator("#frRosterUnits")
         roster.get_by_text("Unit profile", exact=True).first.click()
@@ -126,7 +129,7 @@ def verify(url):
         assert history.inner_text() == rolled
         page.get_by_role("button", name="Load example", exact=True).click()
         page.locator("#combat-count").locator("..").click()
-        page.get_by_label("Rapid Fire", exact=True).check()
+        page.get_by_role("checkbox", name="Rapid Fire", exact=True).click()
         reference = page.get_by_role("button", name="Rapid Fire 1", exact=True)
         if width < 768:
             reference.tap()

@@ -96,7 +96,7 @@
   dialog.addEventListener('close', () => opener?.focus());
   function open(input, options = {}) {
     const rule = resolve(input);
-    if (!dialog.open) opener = document.activeElement;
+    if (!dialog.open) opener = options.opener || document.activeElement;
     title.textContent = rule.label;
     content.replaceChildren();
     const paragraph = text => { if (text) content.append(element('p', text)); };
@@ -133,7 +133,7 @@
     button.className = 'fr-keyword-chip';
     button.type = 'button';
     button.setAttribute('aria-haspopup', 'dialog');
-    button.onclick = () => open(typeof options.currentInput === 'function' ? options.currentInput() : input, {...options, currentInput:undefined});
+    button.onclick = () => open(typeof options.currentInput === 'function' ? options.currentInput() : input, {...options, currentInput:undefined, opener:button});
     return button;
   }
   window.ForgeRosterKeywords = {...api, chip};
