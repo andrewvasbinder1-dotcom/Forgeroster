@@ -1014,9 +1014,9 @@
         return;
       }
       clearScenario();
+      engine = replayEngine;
       status(replay === 'legacy' ? 'Legacy scenario · Recalculating with the installed rules revision.' :
         'Loaded with its saved rules revision · ' + engine.revision + '.');
-      engine = replayEngine;
       $('name').value = entry.name;
       savedRollRows = Array.isArray(entry.scenario.rollHistory)
         ? entry.scenario.rollHistory.filter(row => typeof row === 'string').slice(-60) : [];
