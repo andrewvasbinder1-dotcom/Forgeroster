@@ -71,3 +71,37 @@ test('distinct melee profiles and Extra Attacks respect per-model choices and sc
   setModelStatus(restored,0,'destroyed');
   assert.equal(countScenario(restored,'Claws','melee').weapons,0);
 });
+
+test('quick groups confirm mixed survivors without double counting multi-weapon models', () => {
+  const { bearerGroups, confirmedGroups } = require('../weapon-bearers.js');
+  const unit = scenarioUnit({models:10, combatLoadout:[...Array.from({length:8},()=>model('Rifle','Pistol')),model('Plasma'),model('Heavy')]});
+  unit.remaining = 9;
+  const [rifles,plasma,heavy] = bearerGroups(unit);
+  unit.survivors = {[rifles.key]:8,[plasma.key]:1,[heavy.key]:1};
+  assert.equal(confirmedGroups(unit),null);
+  unit.survivors[plasma.key] = 0;
+  assert.ok(confirmedGroups(unit));
+  assert.equal(countScenario(unit,'Plasma','ranged').weapons,0);
+  assert.equal(countScenario(unit,'Pistol','ranged').weapons,8);
+  const restored = JSON.parse(JSON.stringify(unit));
+  assert.equal(countScenario(restored,'Heavy','ranged').weapons,1);
+  assert.ok(restored.models.every(model => model.status === 'alive'));
+  setModelStatus(restored,8,'destroyed');
+  assert.equal(restored.remaining,9);
+  assert.equal(countScenario(restored,'Plasma','ranged').weapons,0);
+  setModelStatus(restored,8,'alive');
+  assert.equal(restored.remaining,10);
+  resetStrength(restored);
+  assert.equal(restored.survivors,undefined);
+});
+
+test('advanced casualties remove an attached character and a special bearer independently', () => {
+  const unit = scenarioUnit({ models:3, combatLoadout:[model('Rifle'),model('Heavy'),model('Character Blade','Pistol')] },
+    [{name:'Character Blade',phase:'melee'}]);
+  setModelStatus(unit,2,'destroyed');
+  setModelStatus(unit,1,'destroyed');
+  assert.equal(unit.remaining,1);
+  assert.equal(countScenario(unit,'Character Blade','melee').weapons,0);
+  assert.equal(countScenario(unit,'Heavy','ranged').weapons,0);
+  assert.equal(countScenario(unit,'Rifle','ranged').weapons,1);
+});
