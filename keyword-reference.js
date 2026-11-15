@@ -50,6 +50,12 @@
     Psyker: 'Identifies a model or unit for rules that specifically refer to Psykers.',
   })) add(name, 'Unit keyword', '', text, 'Apply an effect only when another rule calls for this classification.', [], 'Classification reference');
 
+  for (const name of ['Leader', 'Support']) {
+    add(name, 'Attachment rule', name === 'Leader' ? '24.22' : '24.34',
+      'Check the datasheet’s eligible bodyguard units before attaching this unit. Apply the attached-unit rules in section 19.',
+      'Unit-specific permissions and exceptions still apply.');
+  }
+
   const byId = new Map(entries.map(entry => [entry.id, entry]));
   function resolve(input) {
     const label = typeof input === 'string' ? input.trim() : input?.label || input?.name || '';
@@ -73,7 +79,51 @@
     return {...entry, label:heading, value, target, valid,
       description:entry.description.replace('{value}', shownValue).replace('{target}', () => target || 'the specified target keyword')};
   }
-  const api = {entries, resolve, source, revision};
+  function factionIndex(catalogue, packs) {
+    const factions = new Map();
+    function addRecord(faction, name, category, source, summary) {
+      if (!name || typeof name !== 'string') return;
+      if (!factions.has(faction)) factions.set(faction, new Map());
+      const records = factions.get(faction);
+      const key = category + ':' + slug(name);
+      if (!records.has(key) || summary) records.set(key, {name, category, source, summary});
+    }
+    for (const faction of catalogue.factions || []) {
+      addRecord(faction.name, faction.name, 'Faction keyword', faction.source);
+      for (const detachment of faction.detachments || []) {
+        addRecord(faction.name, detachment.name, 'Detachment', faction.source);
+      }
+      for (const unit of faction.units || []) {
+        for (const name of unit.keywords || []) {
+          addRecord(faction.name, name, slug(name) === slug(faction.name) ? 'Faction keyword' : 'Unit keyword', unit.datasheetSource);
+        }
+        for (const name of unit.abilityNames || []) addRecord(faction.name, name, 'Unit ability', unit.datasheetSource);
+        for (const weapon of unit.weapons || []) {
+          if (Array.isArray(weapon.keywords)) for (const name of weapon.keywords) addRecord(faction.name, name, 'Weapon ability', unit.datasheetSource);
+        }
+      }
+    }
+    const categories = {'faction-rule':'Faction rule', detachment:'Detachment', ability:'Unit ability', keyword:'Unit keyword', stratagem:'Stratagem', enhancement:'Enhancement'};
+    for (const pack of packs) {
+      for (const item of pack.entries) {
+        if (!item.faction || !categories[item.kind] || !item.text) continue;
+        const sources = (pack.sources || []).filter(ref => /^Games Workshop/i.test(ref.label));
+        const reference = (item.references || []).join(' · ');
+        const matched = sources.find(ref => /codex preview/i.test(ref.label) && /codex preview/i.test(reference)) ||
+          sources.find(ref => /faction pack/i.test(ref.label) && /faction pack/i.test(reference));
+        addRecord(item.faction, item.name, item.detachment && item.kind === 'ability' ? 'Detachment ability' : categories[item.kind],
+          matched?.url, {text:item.text, publication:matched?.label || pack.title, revision:pack.version, reference});
+      }
+    }
+    return new Map([...factions].map(([name, records]) => [name,
+      [...records.values()].sort((a,b) => a.name.localeCompare(b.name))]));
+  }
+  function replayStatus(saved, engineRevision) {
+    if (saved.keywordReferenceRevision && saved.keywordReferenceRevision !== revision ||
+        saved.combatEngineRevision && saved.combatEngineRevision !== engineRevision) return 'unavailable';
+    return saved.keywordReferenceRevision && saved.combatEngineRevision ? 'pinned' : 'legacy';
+  }
+  const api = {entries, resolve, source, revision, factionIndex, replayStatus};
   if (typeof module === 'object') { module.exports = api; return; }
 
   const element = (tag, text) => {
@@ -100,9 +150,10 @@
     title.textContent = rule.label;
     content.replaceChildren();
     const paragraph = text => { if (text) content.append(element('p', text)); };
-    paragraph([rule.category, options.category && !rule.category ? options.category : '', rule.status].filter(Boolean).join(' · '));
-    paragraph(rule.description || 'This keyword has no verified explanation in ForgeRoster.');
+    paragraph([rule.category, options.category && !rule.category ? options.category : '', options.summary && !rule.id ? 'Existing rules pack summary' : rule.status].filter(Boolean).join(' · '));
+    paragraph(rule.description || options.summary?.text || 'This keyword has no verified explanation in ForgeRoster.');
     paragraph(rule.conditions);
+    paragraph(options.context);
     if (rule.valid === false) paragraph('A valid parameter is required to show this rule’s exact effect.');
     if (options.activity) {
       content.append(element('h3', 'Current calculator effect'));
@@ -112,11 +163,12 @@
       content.append(element('h3', 'Related rules'));
       for (const id of rule.related) content.append(chip(byId.get(id).name, options));
     }
-    const ref = rule.source || (options.source ? {url:options.source, publication:'Datasheet source'} : null);
+    const ref = rule.source || (options.source || options.summary ? {url:options.source, publication:options.summary?.publication || 'Datasheet source', revision:options.summary?.revision} : null);
     if (ref) {
       paragraph([ref.publication, ref.revision, ref.section ? '§' + ref.section : '', rule.wording].filter(Boolean).join(' · '));
+      paragraph(options.summary?.reference);
       try {
-        const url = new URL(ref.url);
+        const url = new URL(ref.url || '');
         if (url.protocol === 'https:') {
           const link = element('a', 'Open source reference');
           link.href = url.href;
@@ -136,5 +188,37 @@
     button.onclick = () => open(typeof options.currentInput === 'function' ? options.currentInput() : input, {...options, currentInput:undefined, opener:button});
     return button;
   }
-  window.ForgeRosterKeywords = {...api, chip};
+  let catalogueRequest;
+  async function loadFactionIndex() {
+    catalogueRequest ||= fetch('./data/mfm.json').then(response => {
+      if (!response.ok) throw Error('Faction references are unavailable.');
+      return response.json();
+    }).catch(error => { catalogueRequest = null; throw error; });
+    return factionIndex(await catalogueRequest, window.ForgeRosterRules?.getPacks() || []);
+  }
+  function reviewQueue(index) {
+    return [...index].flatMap(([faction, records]) => records.filter(record =>
+      !record.summary && !resolve(record.name).id).map(record => ({...record, faction})));
+  }
+  async function factionPicker(label, display) {
+    const index = await loadFactionIndex();
+    const select = element('select');
+    select.setAttribute('aria-label', label);
+    select.append(new Option('Choose a faction', ''));
+    for (const faction of [...index.keys()].sort()) select.append(new Option(faction, faction));
+    select.onchange = () => display(index.get(select.value), select.value);
+    return select;
+  }
+  function linkedText(container, text, extra = []) {
+    const names = [...new Set([...entries.map(entry => entry.name), ...extra])].filter(Boolean)
+      .sort((a,b) => b.length - a.length).map(name => [...name].map(char => '.*+?^${}()|[]\\'.includes(char) ? '\\' + char : char).join(''));
+    const pattern = new RegExp('(?<![\\p{L}\\p{N}])(' + names.join('|') + ')(?![\\p{L}\\p{N}])', 'giu');
+    let offset = 0;
+    for (const match of text.matchAll(pattern)) {
+      container.append(text.slice(offset, match.index), chip(match[0]));
+      offset = match.index + match[0].length;
+    }
+    container.append(text.slice(offset));
+  }
+  window.ForgeRosterKeywords = {...api, chip, loadFactionIndex, reviewQueue, factionPicker, linkedText};
 })();

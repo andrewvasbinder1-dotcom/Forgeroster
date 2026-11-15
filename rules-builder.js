@@ -6,7 +6,7 @@ const css=document.createElement('style');css.textContent=`
 #frRules .fr-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,360px);gap:14px}#frRules .fr-panel{background:#151e30;border:1px solid #35445d;border-radius:14px;padding:15px;min-width:0}#frRules h2{margin:4px 0 12px;font-size:21px}#frRules .fr-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:10px 0}#frRules select,#frRules input{width:100%;min-width:0}#frRules .fr-unit{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid #33425c}#frRules .fr-unit strong{display:block}#frRules .fr-unit small{display:block;color:#acbbd3}#frRules .fr-unit button{white-space:nowrap}#frRules .fr-flag{color:#ffca81}#frRules .fr-good{color:#a2e3b0}#frRules .fr-compact{font-size:13px;color:#acbbd3}#frRules .fr-heading{display:flex;justify-content:space-between;gap:8px;align-items:center}#frRules .fr-total{font-size:28px;font-weight:800}#frRules .fr-pill{background:#263a5b;border-radius:8px;padding:7px 10px}#frRules .fr-enh{display:flex;align-items:center;gap:6px}#frRules .fr-enh input{width:auto}#frRules .fr-actions{display:flex;gap:8px;flex-wrap:wrap}#frRules .fr-actions button{flex:1}#frRules .fr-warning{background:#3d2c1d;border-radius:8px;padding:10px;margin:8px 0;color:#ffddae}
 @media(max-width:760px){#frRules{padding:8px}#frRules .fr-shell{display:flex;flex-direction:column}#frRules .fr-panel{padding:13px}#frRules .fr-unit button{min-height:44px}#frRules .fr-heading{align-items:flex-start}#frRules .fr-total{font-size:25px}}
 `;document.head.append(css);
-const root=document.createElement('div');root.id='frRules';root.innerHTML=`<div class="fr-heading"><div><h2 id="frArmyTitle">Army builder</h2><div id="frRosterOverview" class="fr-compact"></div><div id="frMfmVersion" class="fr-compact">Loading imported points…</div></div><div id="frArmyTotal" class="fr-total">0 pts</div></div><div class="fr-shell"><div class="fr-panel"><h2>Add units</h2><input id="frFindUnit" placeholder="Search faction units" aria-label="Search units"><div class="fr-filter-row"><input id="frKeywordFilter" placeholder="Role or keyword" aria-label="Filter by role or keyword"><input id="frCostFilter" type="number" min="0" placeholder="Maximum points" aria-label="Maximum unit points"></div><div id="frUnitsAvailable"></div></div><div class="fr-panel"><h2>Army setup</h2><div id="frLimitLabel" class="fr-compact"></div><div id="frSetupChoices"></div><h2>My roster</h2><div id="frRosterUnits"></div><h2>List checks</h2><div id="frValidation"></div><div class="fr-actions"><button id="frExportRules">Export JSON</button><button id="frExportText">Export text</button><button id="frUndo" disabled>Undo edit</button><label class="fr-import-button">Import JSON<input id="frImportRules" type="file" accept=".json,application/json"></label><button id="frRefreshRules">Update points</button></div></div></div>`;
+const root=document.createElement('div');root.id='frRules';root.innerHTML=`<div class="fr-heading"><div><h2 id="frArmyTitle">Army builder</h2><div id="frRosterOverview" class="fr-compact"></div><div id="frMfmVersion" class="fr-compact">Loading imported points…</div></div><div id="frArmyTotal" class="fr-total">0 pts</div></div><div class="fr-shell"><div class="fr-panel"><h2>Add units</h2><input id="frFindUnit" placeholder="Search faction units" aria-label="Search units"><div class="fr-filter-row"><input id="frKeywordFilter" placeholder="Role or keyword" aria-label="Filter by role or keyword"><input id="frCostFilter" type="number" min="0" placeholder="Maximum points" aria-label="Maximum unit points"></div><div id="frUnitsAvailable"></div></div><div class="fr-panel"><h2>Army setup</h2><div id="frLimitLabel" class="fr-compact"></div><div id="frSetupChoices"></div><h2>My roster</h2><div id="frRosterUnits"></div><h2>List checks</h2><div id="frValidation"></div><div class="fr-actions"><button id="frExportRules">Export JSON</button><button id="frExportText">Export text</button><details id="frExportPreview"><summary>Export preview</summary><div id="frExportPreviewContent"></div></details><button id="frUndo" disabled>Undo edit</button><label class="fr-import-button">Import JSON<input id="frImportRules" type="file" accept=".json,application/json"></label><button id="frRefreshRules">Update points</button></div></div></div>`;
 document.querySelector('main')?.before(root);
 let db=null,loadError='';
 function read(){return window.frRosterStorage.read()}
@@ -70,7 +70,11 @@ function showUnitProfile(unit, faction) {
       ]));
     }
     if (unit.abilityNames?.length) detail.append(node('p','Abilities'), references(unit.abilityNames));
-    if (unit.leads?.length) detail.append(node('p', 'Eligible bodyguards · ' + unit.leads.join(' · ')));
+    if (unit.leads?.length) {
+      const attached = unit.role === 'support' ? 'Support' : 'Leader';
+      detail.append(window.ForgeRosterKeywords.chip(attached, {context:'Listed bodyguards · ' + unit.leads.join(', ')}));
+      detail.append(node('p', 'Eligible bodyguards · ' + unit.leads.join(' · ')));
+    }
     for (const weapon of unit.weapons || []) {
       const calculate = node('button', 'Calculate ' + weapon.name);
       calculate.onclick = () => window.frOpenCombat({ faction, name: unit.name, weapon: weapon.name });
@@ -341,10 +345,23 @@ for(const [items,title] of [[result.errors,'Resolve before play'],[result.incomp
   const heading=node('strong',title);
   const list=document.createElement('ul');
   list.className='fr-warning';
-  for(const issue of items)list.append(node('li',issue));
+  for(const issue of items) {
+    const line = node('li','');
+    window.ForgeRosterKeywords.linkedText(line, issue);
+    list.append(line);
+  }
   validation.append(heading,list);
 }
 if(!result.errors.length&&!result.incomplete.length)validation.append(node('p','All available roster checks passed.'));
+const preview = $('frExportPreviewContent');
+preview.replaceChildren();
+for (const entry of r.units) {
+  const {catalogue} = legality.profileFor(f, entry, sheets, legality.detachments(r));
+  preview.append(node('h4',entry.name + ' · ' + (entry.models || '?') + ' models'));
+  const keywords = new Set([...(catalogue?.keywords || []), ...(catalogue?.abilityNames || []),
+    ...(catalogue?.weapons || []).flatMap(weapon => Array.isArray(weapon.keywords) ? weapon.keywords : [])]);
+  for (const keyword of keywords) preview.append(window.ForgeRosterKeywords.chip(keyword,{source:catalogue?.datasheetSource}));
+}
 }
 for (const id of ['frFindUnit','frKeywordFilter','frCostFilter']) $(id).oninput=draw;
 $('frUndo').onclick = () => {
