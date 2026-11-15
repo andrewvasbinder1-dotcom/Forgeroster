@@ -202,6 +202,30 @@
 
     const query = normalize($('frRuleSearch').value.trim());
     const scope = $('frRuleScope').value;
+    const keywordList = element('details');
+    keywordList.append(element('summary', 'Keyword reference'));
+    if (query && !scope) keywordList.open = true;
+    if (!scope) {
+      const category = element('select');
+      category.setAttribute('aria-label', 'Keyword category');
+      category.append(new Option('All keyword categories', ''));
+      const entries = window.ForgeRosterKeywords.entries;
+      for (const name of new Set(entries.map(entry => entry.category))) category.append(new Option(name, name));
+      const matches = element('div');
+      const drawKeywords = () => {
+        matches.replaceChildren();
+        for (const entry of entries) {
+          if (category.value && entry.category !== category.value) continue;
+          if (query && !normalize(entry.name).includes(query)) continue;
+          matches.append(window.ForgeRosterKeywords.chip(entry.name));
+        }
+        if (!matches.childElementCount) matches.append(element('p', 'No matching reference definitions.'));
+      };
+      category.onchange = drawKeywords;
+      drawKeywords();
+      keywordList.append(category, matches);
+      results.append(keywordList);
+    }
     if (!query && !scope) {
       results.append(element('p', 'Enter a rule, unit or keyword to search, or choose a pack type to browse.', 'muted'));
       return;
@@ -219,7 +243,7 @@
         details.append(element('div', [entry.kind || 'rule', entry.detachment || entry.unit, pack.title, ...(entry.references || [])].filter(Boolean).join(' · '), 'muted'));
         if (entry.text) details.append(element('p', entry.text));
         if (entry.stats) details.append(element('p', Object.entries(entry.stats).map(([key, value]) => `${key}: ${value}`).join(' · ')));
-        for (const keyword of entry.keywords || []) details.append(element('span', keyword, 'tag'));
+        for (const keyword of entry.keywords || []) details.append(window.ForgeRosterKeywords.chip(keyword));
         results.append(details);
       }
     }

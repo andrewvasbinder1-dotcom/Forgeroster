@@ -93,3 +93,11 @@ attack. Finished dice rolls remain in the session history when inputs change.
 Saved scenarios retain up to 60 lines from completed live rolls. Long dice rows are abbreviated. Loading a scenario restores that history for review.
 
 Queued attacks track attacker changes separately from target edits. Changing target characteristics updates the resolution without asking for a new weapon count.
+
+## Keyword reference
+
+The keyword dialog links to the June 2026 11th-edition Core Rules PDF. Its explanations are original. The reference identifies the publication revision and section and labels classifications separately from attack abilities. Missing definitions retain their visible label and can link back to the originating datasheet.
+
+The calculator builds keyword activity from the same compiled attack it uses for probability and live rolls. The state describes the current attack at the time the popup opens. Resolve timing- and roll-dependent effects during play. An attack with no eligible weapons or a targeting error cannot activate those weapon effects.
+
+New saved scenarios record the keyword reference revision. The release bundles only one reference revision. A future update that changes mechanics needs archived version dispatch before old scenarios can be replayed under their original mechanics.

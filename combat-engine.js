@@ -235,8 +235,18 @@
     }
     if (groups.length) effects.push('Mixed groups · ordered saves and per-model Feel No Pain. Probability uses seeded simulation.');
     if (selectedCharacter) effects.push('Precision · Character group ' + selectedCharacter + ' receives attacks first (§24.28).');
+    const keywordActive = {
+      'Rapid Fire': half, Melta: half, Heavy: heavy, Lance: lance, Anti: Boolean(antiActive),
+      'Lethal Hits': lethal && !torrent, 'Sustained Hits': !torrent, 'Indirect Fire': indirect,
+      'Ignores Cover': Boolean(c.cover || c.stealth || indirect), Precision: Boolean(selectedCharacter),
+      Blast: starts >= 5, Cleave: starts >= 5 && !c.split, Psychic: Boolean(c.ignoreHit || c.ignoreSkill),
+      'Close-Quarters': Boolean(c.engaged && c.engagingTarget), Pistol: Boolean(c.engaged && c.engagingTarget),
+      Assault: Boolean(c.advanced), Hazardous: hazard > 0,
+    };
+    const keywordActivity = Object.fromEntries([...keywords.keys()].map(name =>
+      [name, blocked || !weaponCount ? 'unavailable' : keywordActive[name] === false ? 'inactive' : 'active']));
     return {
-      groups, selectedCharacter,
+      groups, selectedCharacter, keywordActivity, cover,
       c, hit, woundRoll, save, armour, inv, wound, skill, effects, warnings, blocked, torrent, lethal, dev,
       hitReroll, woundReroll, sustainedExpr, sustained, attacks, damage, attackPmf, damagePmf,
       weaponCount, models, wounds, hp: groups.length ? groups.reduce((total, g) => total + g.hp, 0) : hp, first, fnp, hazard,

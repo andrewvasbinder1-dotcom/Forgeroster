@@ -52,3 +52,37 @@ body:is([data-fr-view="support"],[data-fr-view="report"],[data-fr-view="admin"])
 @media(prefers-reduced-motion:reduce) {
   *, *::before, *::after { scroll-behavior: auto!important; animation-duration: .01ms!important; transition-duration: .01ms!important; }
 }
+
+.fr-keyword-chip {
+  display: inline-block;
+  min-height: 36px;
+  margin: 3px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+.fr-keyword-chip:focus-visible, .fr-keyword-dialog :focus-visible {
+  outline: 2px solid #ffce7f;
+  outline-offset: 3px;
+}
+.fr-keyword-dialog {
+  box-sizing: border-box;
+  width: min(36rem, calc(100% - 24px));
+  max-height: min(80vh, 44rem);
+  overflow: auto;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+  background: #151e30;
+  color: #f0f3f8;
+  border: 1px solid #526684;
+  border-radius: 12px;
+  padding: 18px;
+}
+.fr-keyword-dialog::backdrop { background: #08101acc; }
+.fr-keyword-dialog a { color: #bddaff; }
+.fr-keyword-dialog button { min-height: 44px; }
+@media (pointer: coarse) {
+  .fr-keyword-chip { min-height: 44px; }
+}
+
+.fr-keyword-chip[hidden] { display: none; }

@@ -204,9 +204,53 @@
   }
   function updateConditions() {
     const cfg = read();
-    for (const { wrap, show } of fields.values()) if (show) wrap.hidden = !show(cfg);
+    for (const { wrap, show, reference } of fields.values()) if (show) {
+      wrap.hidden = !show(cfg);
+      if (reference) reference.hidden = wrap.hidden;
+    }
     fields.get('skill').wrap.firstChild.textContent = cfg.phase === 'melee' ? 'Weapon Skill' : 'Ballistic Skill';
     $('target-label').textContent = 'Editing target ' + targetSlot + (targetSlot === 'B' ? ' for comparison or split fire.' : '.');
+  }
+  function keywordActivity(rule) {
+    if (!rule.id || rule.valid === false) return 'Unavailable · No supported effect for this keyword or parameter.';
+    try {
+      const plan = engine.compile(attackConfig());
+      if (rule.id === 'feel-no-pain') {
+        return (plan.fnp || plan.groups.some(group => group.fnp)) ? 'Active · Applicable damage can be prevented by the defender’s Feel No Pain roll.' :
+          'Inactive · No defending Feel No Pain threshold is configured.';
+      }
+      if (rule.id === 'cover') return plan.cover ? 'Active · Cover worsens Ballistic Skill.' : 'Inactive · No cover penalty applies.';
+      if (rule.id === 'invulnerable-save') {
+        if (plan.groups.length) return plan.groups.some(group => group.inv)
+          ? 'Conditional · Invulnerable saves depend on the model receiving the attack.'
+          : 'Inactive · No group has an invulnerable save.';
+        return plan.inv && plan.inv <= plan.armour ? 'Active · The invulnerable save is at least as good as armour.' :
+          'Inactive · No applicable invulnerable save improves the saving throw.';
+      }
+      const state = plan.keywordActivity[rule.handler];
+      if (state === 'unavailable') return 'Unavailable · The attack is blocked or has no eligible weapons.';
+      if (!state) return 'Inactive · This ability is not selected for the current attack or phase.';
+      if (['rapid-fire', 'melta'].includes(rule.id)) {
+        const limit = Number(plan.c.range) / 2;
+        return (state === 'active' ? 'Active' : 'Inactive') + ' · Target distance ' + plan.c.distance +
+          '″, qualifying range ' + limit + '″ or less.';
+      }
+      return state === 'active' ? 'Active · The calculator applies this rule when its roll or timing condition is met.' :
+        'Inactive · The current attack does not meet the conditions above.';
+    } catch (error) { return 'Unavailable · ' + error.message; }
+  }
+
+  const defenceRules = [
+    ['fnp', 'Feel No Pain', () => ({name:'Feel No Pain',value:read().fnp || undefined})],
+    ['inv', 'Invulnerable Save', () => 'Invulnerable Save'],
+    ['cover', 'Cover', () => 'Cover'],
+  ];
+  for (const [key, name, currentInput] of defenceRules) {
+    const field = fields.get(key);
+    const {wrap} = field;
+    const reference = window.ForgeRosterKeywords.chip(name, {activity:keywordActivity,currentInput});
+    field.reference = reference;
+    wrap.after(reference);
   }
   function renderKeywords() {
     const filter = $('key-search').value.toLowerCase();
@@ -230,7 +274,8 @@
     for (const [index, k] of currentKeywords.entries()) {
       const tag = el('div', null, 'combat-tag');
       const definition = engine.definitions[k.name];
-      const remove = el('button', k.name + ' ×');
+      tag.append(window.ForgeRosterKeywords.chip(k, {activity:keywordActivity}));
+      const remove = el('button', '×');
       remove.setAttribute('aria-label', 'Remove ' + k.name);
       remove.onclick = () => { currentKeywords.splice(index, 1); changeKeywords(); };
       tag.append(remove);
@@ -888,7 +933,7 @@
     const name = $('name').value.trim();
     if (!name) throw Error('Enter a scenario name.');
     captureTarget();
-    const scenario = { schemaVersion: 1, config: read(), queue: clone(queue), targets: clone(targets), targetSlot, attackerState: clone(attackerState), activeProfile, casualtyMode };
+    const scenario = { schemaVersion: 1, keywordReferenceRevision: window.ForgeRosterKeywords.revision, config: read(), queue: clone(queue), targets: clone(targets), targetSlot, attackerState: clone(attackerState), activeProfile, casualtyMode };
     scenario.rollHistory = resolvedHistoryRows().slice(-60).map(row => row.length > 240 ? row.slice(0, 239) + '…' : row);
     const state = account;
     if (state) {
