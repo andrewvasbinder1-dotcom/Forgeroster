@@ -624,9 +624,12 @@
     }));
   }
   let archivedRolls = [];
+  let savedRollRows = [];
   function resetRoll(clearHistory = false) {
-    if (clearHistory) archivedRolls = [];
-    else {
+    if (clearHistory) {
+      archivedRolls = [];
+      savedRollRows = [];
+    } else {
       archivedRolls.push(...completedRolls);
       if (roll && !roll.action && rollQueue[rollIndex]) {
         const previous = rollQueue[rollIndex];
@@ -759,6 +762,23 @@
     }
   }
   const formatRoll = entry => entry.label + ' · ' + entry.values.join(', ');
+  const formatHistory = items => items.flatMap(item => [item.label, ...item.history.map(formatRoll)]);
+  function resolvedHistoryRows() {
+    const rows = [...savedRollRows, ...formatHistory([...archivedRolls, ...completedRolls])];
+    if (roll && !roll.action && rollQueue[rollIndex]) {
+      const active = rollQueue[rollIndex];
+      rows.push(active.label + ' → target ' + active.slot, ...roll.history.map(formatRoll));
+    }
+    return rows;
+  }
+  function drawRollHistory(parent, rows, open = false) {
+    if (!rows.length) return;
+    const history = el('details');
+    history.open = open;
+    history.append(el('summary', 'Roll history'));
+    for (const row of rows) history.append(el('p', row));
+    parent.append(history);
+  }
   function paintLive(parent, entries) {
     if (!roll) {
       rollIndex = 0;
@@ -803,13 +823,9 @@
     for (const [slot, hp] of Object.entries(liveStates)) {
       parent.append(el('p', 'Target ' + slot + ' · ' + (Array.isArray(hp) ? hp.reduce((sum, value) => sum + value, 0) : hp) + ' wounds remaining after previous weapon profiles.'));
     }
-    const history = el('details');
-    history.open = true;
-    history.append(el('summary', 'Roll history'));
-    const rows = [...[...archivedRolls,...completedRolls].flatMap(item => [item.label, ...item.history.map(formatRoll)]),
-      ...roll.history.map(formatRoll)];
-    for (const row of rows) history.append(el('p', row));
-    parent.append(history);
+    const rows = resolvedHistoryRows();
+    if (roll.action) rows.push(...roll.history.map(formatRoll));
+    drawRollHistory(parent, rows, true);
     return rows.join('\n');
   }
 
@@ -821,6 +837,7 @@
       const entries = plans();
       report = mode === 'live' ? paintLive($('results'), entries) : preview($('results'), entries, simulation);
     } catch (error) { report = ''; $('error').textContent = error.message; }
+    if (mode !== 'live' || !roll) drawRollHistory($('results'), resolvedHistoryRows());
   }
   const deviceKey = 'fr-combat-device-scenarios-v1';
   function guestScenarios() {
@@ -858,6 +875,7 @@
     if (!name) throw Error('Enter a scenario name.');
     captureTarget();
     const scenario = { schemaVersion: 1, config: read(), queue: clone(queue), targets: clone(targets), targetSlot, attackerState: clone(attackerState), activeProfile, casualtyMode };
+    scenario.rollHistory = resolvedHistoryRows().slice(-60).map(row => row.length > 240 ? row.slice(0, 239) + '…' : row);
     const state = account;
     if (state) {
       const { error } = await state.client.from('combat_scenarios').insert({ user_id: state.user.id, name, scenario });
@@ -928,6 +946,8 @@
       if (entry?.scenario?.schemaVersion !== 1) return;
       clearScenario();
       $('name').value = entry.name;
+      savedRollRows = Array.isArray(entry.scenario.rollHistory)
+        ? entry.scenario.rollHistory.filter(row => typeof row === 'string').slice(-60) : [];
       queue = clone(entry.scenario.queue || []);
       targets = clone(entry.scenario.targets);
       targetSlot = entry.scenario.targetSlot || 'A';

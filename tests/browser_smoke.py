@@ -86,6 +86,22 @@ def verify(url):
         page.get_by_role("button", name="Recalculate Pending Attack").click()
         expect(page.locator("#combat-results")).to_contain_text("16.00")
         expect(page.locator("#combat-queue")).not_to_contain_text("Outdated")
+        page.get_by_role("button", name="Live dice").click()
+        page.get_by_role("button", name="Roll entire attack sequence").click()
+        history = page.locator("#combat-results details").filter(
+            has=page.get_by_text("Roll history", exact=True)
+        )
+        rolled = history.inner_text()
+        assert "Hits" in rolled, rolled
+        page.get_by_role("textbox", name="Scenario name").fill("Resolved dice QA")
+        page.get_by_role("button", name="Save scenario").click()
+        page.get_by_role("button", name="Load example").click()
+        expect(page.get_by_text("Roll history", exact=True)).to_have_count(0)
+        page.get_by_role("button", name="Probability", exact=True).click()
+        page.get_by_role("combobox", name="Saved scenarios").select_option(label="Resolved dice QA")
+        page.get_by_role("button", name="Load scenario", exact=True).click()
+        page.get_by_text("Roll history", exact=True).click()
+        assert history.inner_text() == rolled
         page.get_by_role("button", name="Report a bug").click()
         expect(page.get_by_role("heading", name="Report a bug")).to_be_visible()
         page.goto(url + "#admin")
