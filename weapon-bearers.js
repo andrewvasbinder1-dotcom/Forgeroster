@@ -57,8 +57,8 @@
     const groups = new Map();
     for (const model of unit.models) {
       if (model.status === 'destroyed') continue;
-      const key = JSON.stringify([model.weapons ? [...model.weapons].sort() : null, model.melee || '']);
-      const group = groups.get(key) || { key, weapons: model.weapons, melee: model.melee, size: 0 };
+      const key = JSON.stringify([model.weapons ? [...model.weapons].sort() : null, model.melee || '', model.source || '']);
+      const group = groups.get(key) || { key, weapons: model.weapons, melee: model.melee, source: model.source, size: 0 };
       group.size++;
       groups.set(key, group);
     }
@@ -77,14 +77,18 @@
     if (unit.remaining === 0) return { weapons: 0, issue: '' };
     const candidates = unit.models.filter(model => model.status !== 'destroyed');
     if (unit.remaining > candidates.length) return { weapons: null, issue: 'Restore a destroyed model in Manage Casualties.' };
-    const standardMelee = new Set(unit.profiles.filter(p => p.phase === 'melee' && !p.extra).map(p => p.name));
+    const profile = unit.profiles.find(p => p.id === weapon);
     const copiesFor = model => {
-      if (!model.weapons) return null;
-      const amount = model.weapons.filter(name => name === weapon).length;
-      if (!amount || phase !== 'melee' || !standardMelee.has(weapon)) return amount;
-      const choices = new Set(model.weapons.filter(name => standardMelee.has(name)));
+      if (profile?.source && model.source !== profile.source) return 0;
+      if (profile?.ambiguous || !model.weapons) return null;
+      const name = profile?.name || weapon;
+      const amount = model.weapons.filter(item => item === name).length;
+      const standardMelee = new Set(unit.profiles.filter(p => p.phase === 'melee' && !p.extra &&
+        (!p.source || p.source === model.source)).map(p => p.name));
+      if (!amount || phase !== 'melee' || !standardMelee.has(name)) return amount;
+      const choices = new Set(model.weapons.filter(item => standardMelee.has(item)));
       if (choices.size > 1 && !choices.has(model.melee)) return null;
-      return choices.size === 1 || model.melee === weapon ? 1 : 0;
+      return choices.size === 1 || model.melee === name ? 1 : 0;
     };
     const groups = confirmedGroups(unit);
     if (groups && unit.remaining < candidates.length) {
