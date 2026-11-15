@@ -136,6 +136,17 @@ def verify(url):
         page.get_by_role("button", name="Load scenario", exact=True).click()
         page.get_by_text("Roll history", exact=True).click()
         assert history.inner_text() == rolled
+        expect(page.locator("#combat-scenario-status")).to_contain_text("11e-combat-2")
+        page.evaluate("""() => {
+            const key = 'fr-combat-device-scenarios-v1';
+            const saves = JSON.parse(localStorage.getItem(key));
+            const entry = saves.find(save => save.name === 'Resolved dice QA');
+            entry.scenario.combatEngineRevision = '11e-combat-1';
+            localStorage.setItem(key, JSON.stringify(saves));
+        }""")
+        page.get_by_role("combobox", name="Saved scenarios").select_option(label="Resolved dice QA")
+        page.get_by_role("button", name="Load scenario", exact=True).click()
+        expect(page.locator("#combat-scenario-status")).to_contain_text("11e-combat-1")
         page.get_by_role("button", name="Load example", exact=True).click()
         page.locator("#combat-count").locator("..").click()
         page.get_by_role("checkbox", name="Rapid Fire", exact=True).click()

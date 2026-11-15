@@ -236,10 +236,10 @@
     if (groups.length) effects.push('Mixed groups · ordered saves and per-model Feel No Pain. Probability uses seeded simulation.');
     if (selectedCharacter) effects.push('Precision · Character group ' + selectedCharacter + ' receives attacks first (§24.28).');
     const keywordActive = {
-      'Rapid Fire': half, Melta: half, Heavy: heavy, Lance: lance, Anti: Boolean(antiActive),
-      'Lethal Hits': lethal && !torrent, 'Sustained Hits': !torrent, 'Indirect Fire': indirect,
+      'Rapid Fire': half && Number(value('Rapid Fire')) > 0, Melta: melta > 0, Heavy: heavy, Lance: lance, Anti: Boolean(antiActive),
+      'Lethal Hits': lethal && !torrent, 'Sustained Hits': !torrent && [...sustained.keys()].some(count => count > 0), 'Indirect Fire': indirect,
       'Ignores Cover': Boolean(c.cover || c.stealth || indirect), Precision: Boolean(selectedCharacter),
-      Blast: starts >= 5, Cleave: starts >= 5 && !c.split, Psychic: Boolean(c.ignoreHit || c.ignoreSkill),
+      Blast: starts >= 5 && Number(value('Blast')) > 0, Cleave: starts >= 5 && !c.split && Number(value('Cleave')) > 0, Psychic: Boolean(c.ignoreHit || c.ignoreSkill),
       'Close-Quarters': Boolean(c.engaged && c.engagingTarget), Pistol: Boolean(c.engaged && c.engagingTarget),
       Assault: Boolean(c.advanced), Hazardous: hazard > 0,
     };
@@ -534,7 +534,7 @@
     const result = summarize(initial, state, {}, 'Monte Carlo · ' + samples + ' samples · seed ' + seed);
     return { ...result, casualties, expectedKills: mean(casualties) };
   }
-  const api = { revision: '11e-combat-1', source, definitions, example, keyword, weaponPhase, woundThreshold, pmf, compile, calculate, live, simulate, seededDie };
+  const api = { revision: '11e-combat-2', source, definitions, example, keyword, weaponPhase, woundThreshold, pmf, compile, calculate, live, simulate, seededDie };
   if (typeof module === 'object') module.exports = api;
   else window.ForgeRosterCombat = api;
 })();

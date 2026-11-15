@@ -248,10 +248,57 @@
       if (!access?.data || access.error) throw Error('Administrator access is required.');
       const refs = window.ForgeRosterKeywords;
       const results = document.createElement('div');
-      const select = await refs.factionPicker('Review faction', (records, faction) => {
+      let selection = 0;
+      const select = await refs.factionPicker('Review faction', async (records, faction) => {
+        const request = ++selection;
         results.replaceChildren();
         if (!records) return;
         const queue = refs.reviewQueue(new Map([[faction, records]]));
+        const saved = await actor.client.rpc('fr_keyword_triage_list', {p_faction:faction});
+        if (actor !== session || request !== selection) return;
+        if (saved.error) results.append(element('p','Shared review decisions are unavailable.'));
+        const decisions = new Map((saved.data || []).map(row => [JSON.stringify([row.category,row.keyword]), row]));
+        if (!saved.error && queue.length) {
+          const entry = element('select');
+          entry.setAttribute('aria-label','Definition to triage');
+          for (const [index, record] of queue.entries()) {
+            entry.add(new Option(record.name + ' · ' + record.category, String(index)));
+          }
+          const status = element('select');
+          status.setAttribute('aria-label','Keyword review status');
+          for (const value of ['pending','researching','resolved']) status.add(new Option(value,value));
+          const note = element('textarea');
+          note.setAttribute('aria-label','Keyword review note');
+          note.maxLength = 1000;
+          const save = element('button','Save review decision');
+          const message = element('p');
+          message.setAttribute('role','status');
+          function show() {
+            const record = queue[Number(entry.value)];
+            const decision = decisions.get(JSON.stringify([record.category, record.name]));
+            status.value = decision?.status || 'pending';
+            note.value = decision?.note || '';
+            message.textContent = '';
+          }
+          entry.onchange = show;
+          save.onclick = async () => {
+            const record = queue[Number(entry.value)];
+            const decision = {status:status.value,note:note.value};
+            const position = entry.value;
+            save.disabled = true;
+            try {
+              const response = await actor.client.rpc('fr_keyword_triage_save', {
+                p_faction:faction, p_category:record.category, p_keyword:record.name,
+                p_status:decision.status, p_note:decision.note,
+              });
+              if (actor !== session || request !== selection) return;
+              if (!response.error) decisions.set(JSON.stringify([record.category,record.name]), decision);
+              if (entry.value === position) message.textContent = response.error ? 'Review decision could not be saved.' : 'Review decision saved.';
+            } finally { save.disabled = false; }
+          };
+          show();
+          results.append(entry,status,note,save,message);
+        }
         results.append(element('p', queue.length + ' definitions to review'));
         let shown = 0;
         const more = element('button','Show more definitions');
