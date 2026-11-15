@@ -88,3 +88,10 @@ body[data-fr-view="combat"] :is(#frWizard, #frRules, #frRuleLibrary, #frSources,
 }
 
 #frCombat textarea { min-height: 88px; padding: 8px; font: inherit; resize: vertical; }
+
+#combat-strength { margin: 12px 0; padding: 12px; }
+#frCombat .combat-strength-controls { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 8px; align-items: end; }
+#frCombat .combat-strength-controls button { min-width: 44px; }
+#combat-models fieldset { min-width: 0; margin: 8px 0; border: 1px solid var(--combat-border); border-radius: 8px; }
+#combat-models select { width: 100%; }
+#combat-models p { overflow-wrap: anywhere; }

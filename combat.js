@@ -2,6 +2,7 @@
 
 (() => {
   const engine = window.ForgeRosterCombat;
+  const bearers = window.ForgeRosterBearers;
   const root = document.createElement('section');
   root.id = 'frCombat';
   root.hidden = true;
@@ -12,6 +13,15 @@
       <section><h3>Attack profile</h3><div id="combat-offence" class="combat-fields"></div>
         <label>Attacking unit<select id="combat-attacker"></select></label>
         <label>Datasheet weapon<select id="combat-weapon"></select></label>
+        <section id="combat-strength" hidden><h4>Unit Strength</h4>
+          <div class="combat-strength-controls"><button id="combat-fewer" type="button" aria-label="Remove one remaining model">−</button>
+          <label>Models Remaining<input id="combat-remaining" type="number" min="0" step="1" inputmode="numeric"></label>
+          <button id="combat-more" type="button" aria-label="Add one remaining model">+</button></div>
+          <p id="combat-strength-summary" aria-live="polite"></p>
+          <details id="combat-casualties"><summary>Manage Casualties</summary><div id="combat-models"></div></details>
+          <button id="combat-full" type="button">Reset to Full Strength</button>
+          <details><summary>Available Weapons</summary><div id="combat-available"></div></details>
+        </section>
         <p id="combat-equipment" class="combat-note"></p>
         <details><summary>Weapon keywords <span id="combat-count"></span></summary>
           <label>Search keywords<input id="combat-key-search" type="search"></label>
@@ -141,6 +151,7 @@
   let queue = [], mode = 'probability', roll = null, rollIndex = 0, rollQueue = [], liveStates = {}, completedRolls = [], report = '';
   let account = null, cloudScenarios = [], rosterChoices = [], catalog = null, requestedEntry = null, profileTarget = null;
   let pending = 0;
+  let attackerState = null, activeProfile = '';
 
   function read() {
     const obj = { keywords: clone(currentKeywords) };
@@ -149,6 +160,15 @@
         control.type === 'number' && control.value !== '' ? Number(control.value) : key === 'skill' ? control.value.replace(/\+$/, '') : control.value;
     }
     obj.useLethal = !obj.skipLethal;
+    return obj;
+  }
+  function attackConfig() {
+    const obj = read();
+    if (attackerState) {
+      if (attackerState.remaining === 0) obj.weaponCountOverride = 0;
+      else if (obj.weaponCountOverride === '' && (obj.models > attackerState.remaining ||
+        obj.models === '' && activeProfile)) throw Error('Confirm the surviving weapon count. Manual bearers cannot exceed Models Remaining.');
+    }
     return obj;
   }
   function fill(data, keys = Object.keys(data)) {
@@ -303,8 +323,96 @@
     }
     output.append(el('p', 'Use the numeric modifiers above after confirming these rules apply. Listed faction, Leader, enhancement and stratagem text does not change the calculation automatically.', 'combat-note'));
   }
+  function drawStrength(redrawModels = false) {
+    $('strength').hidden = !attackerState;
+    if (!attackerState) return;
+    const unit = attackerState;
+    const max = unit.models.filter(model => model.status !== 'destroyed').length;
+    $('remaining').max = max;
+    $('remaining').value = unit.remaining;
+    $('fewer').disabled = !unit.remaining;
+    $('more').disabled = unit.remaining >= max;
+    $('strength-summary').textContent = unit.name + ' · ' + unit.start + ' starting · ' +
+      unit.remaining + ' remaining · ' + (unit.start - unit.remaining) + ' destroyed. Applies to the current weapon. Queued attacks keep their saved counts.';
+    const available = $('available');
+    available.replaceChildren();
+    const phase = fields.get('phase').control.value;
+    for (const profile of unit.profiles.filter(p => p.phase === phase)) {
+      const count = bearers.countScenario(unit, profile.name, phase);
+      let attacks = '—';
+      if (count.weapons !== null) {
+        try {
+          const base = [...engine.pmf(profile.attacks)].reduce((sum, [n,p]) => sum + n*p,0);
+          attacks = (base * count.weapons).toLocaleString(undefined,{maximumFractionDigits:2});
+        } catch { /* Non-numeric printed attack expressions require manual setup. */ }
+      }
+      available.append(el('p', profile.name + ' · ' + (count.weapons ?? 'Unconfirmed') + ' weapons · ' + attacks + ' base attacks'));
+    }
+    if (!redrawModels) return;
+    $('models').replaceChildren();
+    for (const [i, model] of unit.models.entries()) {
+      const group = el('fieldset');
+      group.append(el('legend', 'Model ' + (i + 1)));
+      group.append(el('p', model.weapons?.join(', ') || (model.weapons ? 'No weapons recorded' : 'Equipment unknown')));
+      const state = el('select');
+      state.setAttribute('aria-label', 'Model ' + (i + 1) + ' status');
+      for (const label of ['Alive','Destroyed','Wounded']) state.add(new Option(label,label.toLowerCase()));
+      state.value = model.status;
+      state.onchange = () => { bearers.setModelStatus(unit,i,state.value); updateStrength(true); };
+      group.append(state);
+      if (model.status === 'wounded') {
+        const label = el('label','Remaining wounds for model ' + (i + 1));
+        const wounds = el('input');
+        wounds.type = 'number'; wounds.min = 1; wounds.step = 1;
+        wounds.value = model.wounds ?? '';
+        wounds.oninput = () => { model.wounds = Number.isInteger(+wounds.value) && +wounds.value > 0 ? +wounds.value : null; };
+        label.append(wounds); group.append(label);
+      }
+      const melee = [...new Set(model.weapons || [])].filter(name => unit.profiles.some(p => p.name === name && p.phase === 'melee' && !p.extra));
+      if (melee.length > 1) {
+        const label = el('label','Standard melee weapon for model ' + (i + 1));
+        const select = el('select');
+        options(select,'Choose one melee weapon',melee.map(name => [name,name]),model.melee);
+        select.onchange = () => { model.melee = select.value; updateStrength(false); };
+        label.append(select); group.append(label);
+      }
+      $('models').append(group);
+    }
+  }
+
+  function syncWeaponCount() {
+    if (!attackerState) return;
+    const result = activeProfile ? bearers.countScenario(attackerState, activeProfile, fields.get('phase').control.value) : null;
+    fill({ models: result ? '' : attackerState.remaining, copies: 1,
+      weaponCountOverride: result?.weapons ?? (attackerState.remaining === 0 ? 0 : '') });
+    $('equipment').textContent = result?.issue || (result ? result.weapons + ' surviving weapons for ' + activeProfile : '');
+  }
+
+  function updateStrength(redrawModels) {
+    syncWeaponCount(); drawStrength(redrawModels); resetRoll(); render();
+  }
+  function setRemaining(value) {
+    if (!attackerState || !Number.isInteger(value)) return;
+    const max = attackerState.models.filter(model => model.status !== 'destroyed').length;
+    attackerState.remaining = Math.max(0, Math.min(max,value));
+    $('remaining').value = attackerState.remaining;
+    updateStrength(false);
+  }
+  $('remaining').oninput = () => { if ($('remaining').value !== '') setRemaining(Number($('remaining').value)); };
+  $('remaining').onblur = () => { if (attackerState) $('remaining').value = attackerState.remaining; };
+  $('fewer').onclick = () => setRemaining(attackerState.remaining - 1);
+  $('more').onclick = () => setRemaining(attackerState.remaining + 1);
+  $('full').onclick = () => { bearers.resetStrength(attackerState); updateStrength(true); };
+
   function attachSource(record, requestedWeapon) {
     sourceUnit = record;
+    activeProfile = '';
+    attackerState = bearers.scenarioUnit(record?.unit, (record?.profile?.weapons || []).map(w => ({
+      name: w.name, phase: engine.weaponPhase(w), attacks: w.a,
+      extra: (w.keywords || []).some(k => engine.keyword(k).name === 'Extra Attacks'),
+    })));
+    if (attackerState) attackerState.id = record?.unit.id || record?.id || '';
+    drawStrength(true);
     fill({ weaponCountOverride: '' });
     const equipped = (record?.unit.wargear || []).map(w => typeof w === 'string' ? w : w.item);
     $('equipment').textContent = !record ? '' : equipped.length ?
@@ -333,18 +441,16 @@
     options($('weapon'), 'Manual weapon profile', rows, chosen >= 0 ? String(chosen) :
       auto ? defaultWeapon?.[0] || rows[0]?.[0] : selectedWeapon);
     if ($('weapon').value) applyWeapon();
-    else { if (sourceUnit) currentKeywords = []; originalKeywords = []; fill({ weaponCountOverride: '' }); renderKeywords(); }
+    else { activeProfile = ''; if (sourceUnit) currentKeywords = []; originalKeywords = []; fill({ weaponCountOverride: '' }); syncWeaponCount(); drawStrength(false); renderKeywords(); }
   }
   function applyWeapon() {
     const weapon = sourceUnit?.profile?.weapons?.[Number($('weapon').value)];
-    if ($('weapon').value === '' || !weapon) { originalKeywords = []; fill({ weaponCountOverride: '' }); return; }
+    if ($('weapon').value === '' || !weapon) { originalKeywords = []; activeProfile = ''; fill({ weaponCountOverride: '' }); syncWeaponCount(); return; }
     const num = text => /^-?\d+/.test(String(text)) ? Number(String(text).match(/^-?\d+/)[0]) : '';
     const range = num(weapon.range);
-    const count = window.ForgeRosterBearers.countWeapons(sourceUnit.unit.combatLoadout, sourceUnit.unit.models, weapon.name);
-    fill({ models: count ? Math.max(1, count.bearers) : '', copies: 1, weaponCountOverride: count?.weapons ?? '' });
-    $('equipment').textContent = count
-      ? count.weapons + ' recorded weapons on ' + count.bearers + ' surviving models. Clear the override to use manual counts.'
-      : 'Enter the number of surviving bearers and copies per model, or record every model in the army builder.';
+    activeProfile = weapon.name;
+    syncWeaponCount();
+    drawStrength(false);
     fill({ attacks: weapon.a, skill: weapon.skill === '-' ? '-' : num(weapon.skill),
       strength: num(weapon.s), ap: num(weapon.ap), damage: weapon.d, range });
     originalKeywords = (weapon.keywords || []).map(engine.keyword);
@@ -384,7 +490,7 @@
   }
   function plans() {
     captureTarget();
-    if (!queue.length) return [{ slot: targetSlot, label: 'Current weapon', plan: engine.compile(read()) }];
+    if (!queue.length) return [{ slot: targetSlot, label: 'Current weapon', plan: engine.compile(attackConfig()) }];
     return queue.map(({ slot, config, label }) => ({
       slot, label, plan: engine.compile({ ...config, ...targets[slot] }),
     }));
@@ -559,6 +665,7 @@
     status('');
   }
   function clearScenario() {
+    attackerState = null; activeProfile = ''; drawStrength();
     sourceUnit = null; profileTarget = null; requestedEntry = null;
     queue = []; targetSlot = 'A'; targets = { A: {}, B: {} }; originalKeywords = [];
     options($('weapon'), 'Manual weapon profile', []);
@@ -575,7 +682,7 @@
     const name = $('name').value.trim();
     if (!name) throw Error('Enter a scenario name.');
     captureTarget();
-    const scenario = { schemaVersion: 1, config: read(), queue: clone(queue), targets: clone(targets), targetSlot };
+    const scenario = { schemaVersion: 1, config: read(), queue: clone(queue), targets: clone(targets), targetSlot, attackerState: clone(attackerState), activeProfile };
     const state = account;
     if (state) {
       const { error } = await state.client.from('combat_scenarios').insert({ user_id: state.user.id, name, scenario });
@@ -597,17 +704,20 @@
     'target-a'() { switchTarget('A'); },
     'target-b'() { switchTarget('B'); },
     queue() {
-      const config = read();
+      const config = attackConfig();
       engine.compile(config);
       if (queue.length >= 12) throw Error('Queue up to 12 profiles.');
       const weapon = $('weapon').selectedOptions[0];
       const baseMelee = config.phase === 'melee' && !config.keywords.some(k => k.name === 'Extra Attacks');
-      const attacker = sourceUnit?.unit.id || $('attacker').value || sourceUnit?.unit.name || 'manual';
+      const attacker = attackerState?.id || sourceUnit?.unit.id || $('attacker').value || attackerState?.name || 'manual';
+      const counted = attackerState && activeProfile ? bearers.countScenario(attackerState, activeProfile, config.phase) : null;
+      const slots = counted?.weapons === config.weaponCountOverride ? counted?.slots : null;
       if (baseMelee && !config.split && queue.some(e => e.attacker === attacker &&
-        e.config.phase === 'melee' && !e.config.split && !e.config.keywords.some(k => k.name === 'Extra Attacks'))) {
-        throw Error('One standard melee profile per attacking model. For different bearers, select a separate roster entry or split and manually allocate attacks.');
+        e.config.phase === 'melee' && !e.config.split && !e.config.keywords.some(k => k.name === 'Extra Attacks') &&
+        (!slots || !e.slots || e.slots.some(slot => slots.includes(slot))))) {
+        throw Error('Each model may queue one standard melee profile. Confirm distinct bearers or manually allocate split attacks.');
       }
-      queue.push({ config, attacker, slot: targetSlot, label: weapon?.value ? weapon.textContent : 'Manual ' + (config.phase === 'melee' ? 'melee' : 'ranged') + ' weapon' });
+      queue.push({ config, attacker, slots, slot: targetSlot, label: weapon?.value ? weapon.textContent : 'Manual ' + (config.phase === 'melee' ? 'melee' : 'ranged') + ' weapon' });
       resetRoll(); render();
     },
     clear() { queue = []; resetRoll(); render(); },
@@ -640,7 +750,10 @@
       queue = clone(entry.scenario.queue || []);
       targets = clone(entry.scenario.targets);
       targetSlot = entry.scenario.targetSlot || 'A';
+      attackerState = entry.scenario.attackerState ? clone(entry.scenario.attackerState) : null;
+      activeProfile = entry.scenario.activeProfile || '';
       setConfig(entry.scenario.config);
+      drawStrength(true);
       render();
     },
   };

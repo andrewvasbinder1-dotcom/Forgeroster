@@ -22,3 +22,52 @@ test('explicit weapon counts drive attacks and zero surviving weapons stays zero
   assert.equal(engine.calculate(none).attacks, 0);
   assert.equal(engine.live(none, () => 6).finish().damage, 0);
 });
+
+const { scenarioUnit, countScenario, setModelStatus, resetStrength } = require('../weapon-bearers.js');
+const model = (...weapons) => ({ alive: true, weapons });
+
+test('uniform loadout reduces 10 to 9 or 5 and updates projected attacks and damage', () => {
+  const unit = scenarioUnit({models:10, combatLoadout:Array.from({length:10}, () => model('Rifle'))});
+  let previous = Infinity;
+  for (const remaining of [10,9,5,0]) {
+    unit.remaining = remaining;
+    const { weapons } = countScenario(unit,'Rifle','ranged');
+    assert.equal(weapons,remaining);
+    const result = engine.calculate(engine.compile({...engine.example,weaponCountOverride:weapons}));
+    assert.equal(result.attacks,remaining * 4);
+    assert.ok(result.rawDamage < previous);
+    previous = result.rawDamage;
+  }
+});
+
+test('mixed equipment needs identities and excludes the specific lost bearer', () => {
+  const saved = {models:10,combatLoadout:[...Array.from({length:8},()=>model('Rifle')),model('Plasma'),model('Heavy','Pistol')]};
+  const unit = scenarioUnit(saved);
+  unit.remaining = 9;
+  assert.equal(countScenario(unit,'Plasma','ranged').weapons,null);
+  setModelStatus(unit,0,'destroyed');
+  assert.equal(countScenario(unit,'Rifle','ranged').weapons,7);
+  assert.equal(countScenario(unit,'Plasma','ranged').weapons,1);
+  resetStrength(unit);
+  setModelStatus(unit,8,'destroyed');
+  assert.equal(countScenario(unit,'Rifle','ranged').weapons,8);
+  assert.equal(countScenario(unit,'Plasma','ranged').weapons,0);
+  assert.equal(countScenario(unit,'Pistol','ranged').weapons,1);
+  assert.equal(saved.combatLoadout[8].alive,true);
+});
+
+test('distinct melee profiles and Extra Attacks respect per-model choices and scenario round trip', () => {
+  const unit = scenarioUnit({models:2,combatLoadout:[model('Sword','Axe','Claws'),model('Axe')]},
+    [{name:'Sword',phase:'melee'},{name:'Axe',phase:'melee'},{name:'Claws',phase:'melee',extra:true}]);
+  assert.equal(countScenario(unit,'Axe','melee').weapons,null);
+  unit.models[0].melee = 'Sword';
+  setModelStatus(unit,0,'wounded');
+  unit.models[0].wounds = 2;
+  const restored = JSON.parse(JSON.stringify({ schemaVersion:1, attackerState:unit })).attackerState;
+  assert.equal(restored.models[0].wounds,2);
+  assert.deepEqual(countScenario(restored,'Sword','melee').slots,[0]);
+  assert.deepEqual(countScenario(restored,'Axe','melee').slots,[1]);
+  assert.equal(countScenario(restored,'Claws','melee').weapons,1);
+  setModelStatus(restored,0,'destroyed');
+  assert.equal(countScenario(restored,'Claws','melee').weapons,0);
+});

@@ -20,7 +20,64 @@
     return { bearers, weapons };
   }
 
-  const api = { valid, countWeapons };
+  function scenarioUnit(unit, profiles = []) {
+    const start = unit?.models;
+    if (!Number.isInteger(start) || start < 1 || start > 100) return null;
+    const loadout = valid(unit.combatLoadout, start) ? unit.combatLoadout : Array(start).fill(null);
+    return {
+      name: unit.name, start, profiles,
+      remaining: start - loadout.filter(model => model?.alive === false).length,
+      models: loadout.map(model => ({
+        status: model?.alive === false ? 'destroyed' : 'alive',
+        weapons: model ? [...model.weapons] : null,
+        wounds: null, melee: '',
+      })),
+    };
+  }
+
+  function setModelStatus(unit, index, status) {
+    if (!['alive','wounded','destroyed'].includes(status) || !unit.models[index]) return;
+    const model = unit.models[index];
+    if (model.status !== 'destroyed' && status === 'destroyed') {
+      const known = unit.models.filter(row => row.status !== 'destroyed').length;
+      if (known === unit.remaining) unit.remaining--;
+    } else if (model.status === 'destroyed') unit.remaining++;
+    model.status = status;
+    if (status !== 'wounded') model.wounds = null;
+  }
+
+  function resetStrength(unit) {
+    unit.remaining = unit.start;
+    for (const model of unit.models) { model.status = 'alive'; model.wounds = null; }
+  }
+
+  function countScenario(unit, weapon, phase) {
+    if (unit.remaining === 0) return { weapons: 0, issue: '' };
+    const candidates = unit.models.filter(model => model.status !== 'destroyed');
+    if (unit.remaining > candidates.length) return { weapons: null, issue: 'Restore a destroyed model in Manage Casualties.' };
+    const standardMelee = new Set(unit.profiles.filter(p => p.phase === 'melee' && !p.extra).map(p => p.name));
+    const copies = candidates.map(model => {
+      if (!model.weapons) return null;
+      const amount = model.weapons.filter(name => name === weapon).length;
+      if (!amount || phase !== 'melee' || !standardMelee.has(weapon)) return amount;
+      const choices = new Set(model.weapons.filter(name => standardMelee.has(name)));
+      if (choices.size > 1 && !choices.has(model.melee)) return null;
+      return choices.size === 1 || model.melee === weapon ? 1 : 0;
+    });
+    if (copies.includes(null)) return { weapons: null, issue: 'Confirm the bearer count manually or resolve the missing model equipment or melee choices.' };
+    if (unit.remaining < candidates.length && new Set(copies).size > 1) {
+      return { weapons: null, issue: 'Identify the lost models in Manage Casualties or enter a confirmed surviving weapon count.' };
+    }
+    return {
+      weapons: unit.remaining < candidates.length ? unit.remaining * copies[0] : copies.reduce((a,b) => a+b,0),
+      slots: unit.remaining === candidates.length
+        ? unit.models.flatMap((model, i) => model.status !== 'destroyed' && copies[candidates.indexOf(model)] > 0 ? [i] : [])
+        : null,
+      issue: '',
+    };
+  }
+
+  const api = { valid, countWeapons, scenarioUnit, setModelStatus, resetStrength, countScenario };
   if (typeof module === 'object') module.exports = api;
   else window.ForgeRosterBearers = api;
 })();
