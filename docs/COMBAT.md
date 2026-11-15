@@ -91,3 +91,5 @@ before recalculating it, keep the original snapshot explicitly, or remove the
 attack. Finished dice rolls remain in the session history when inputs change.
 
 Saved scenarios retain up to 60 lines from completed live rolls. Long dice rows are abbreviated. Loading a scenario restores that history for review.
+
+Queued attacks track attacker changes separately from target edits. Changing target characteristics updates the resolution without asking for a new weapon count.

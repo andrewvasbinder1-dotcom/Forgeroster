@@ -638,15 +638,29 @@
     }
     roll = null; rollQueue = []; liveStates = {}; completedRolls = [];
   }
+  function attackSnapshot({remaining, models, survivors, config}) {
+    const offence = Object.fromEntries(Object.entries(config).filter(([key]) => !targetFields.has(key)));
+    // PostgreSQL JSONB can reorder keys when it returns saved scenarios.
+    return JSON.stringify({remaining, models, survivors, config: offence}, (key, value) =>
+      value && typeof value === 'object' && !Array.isArray(value)
+        ? Object.fromEntries(Object.keys(value).sort().map(name => [name, value[name]]))
+        : value);
+  }
   function currentSnapshot(entry) {
     const state = attackerState;
     if (!state || !entry.profile || entry.attacker !== state.id) return null;
-    return JSON.stringify({remaining:state.remaining,models:state.models,survivors:state.survivors,
-      config: entry.profile === activeProfile ? read() : entry.config});
+    return attackSnapshot({...state, config: entry.profile === activeProfile ? read() : entry.config});
+  }
+  function matchesSnapshot(serialized, current) {
+    if (serialized === current) return true;
+    // Older saves included the active target's values in the attack snapshot.
+    try { return attackSnapshot(JSON.parse(serialized)) === current; }
+    catch { return false; }
   }
   function outdated(entry) {
     const snapshot = currentSnapshot(entry);
-    return snapshot !== null && entry.snapshot != null && entry.snapshot !== snapshot && entry.accepted !== snapshot;
+    return snapshot !== null && entry.snapshot != null &&
+      !matchesSnapshot(entry.snapshot, snapshot) && !matchesSnapshot(entry.accepted, snapshot);
   }
   const fmt = value => Number.isFinite(value) ? value.toFixed(2) : '—';
   const pct = value => Number.isFinite(value) ? (value * 100).toFixed(2) + '%' : '—';
