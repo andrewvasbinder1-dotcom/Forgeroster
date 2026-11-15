@@ -105,3 +105,16 @@ test('advanced casualties remove an attached character and a special bearer inde
   assert.equal(countScenario(unit,'Heavy','ranged').weapons,0);
   assert.equal(countScenario(unit,'Rifle','ranged').weapons,1);
 });
+
+test('same-name weapons resolve separately by source and keep each copy', () => {
+  const unit = scenarioUnit({models:2,combatLoadout:[model('Blade','Blade'), model('Blade')]},
+    [{name:'Blade',id:'trooper/blade',source:'trooper',phase:'ranged'},
+     {name:'Blade',id:'leader/blade',source:'leader',phase:'ranged'}]);
+  unit.models[0].source = 'trooper';
+  unit.models[1].source = 'leader';
+  assert.equal(countScenario(unit,'trooper/blade','ranged').weapons,2);
+  assert.equal(countScenario(unit,'leader/blade','ranged').weapons,1);
+  setModelStatus(unit,1,'destroyed');
+  assert.equal(countScenario(unit,'leader/blade','ranged').weapons,0);
+  assert.equal(countScenario(unit,'trooper/blade','ranged').weapons,2);
+});

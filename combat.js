@@ -172,8 +172,13 @@
     const obj = read();
     if (attackerState) {
       const candidateCount = attackerState.models.filter(m => m.status !== 'destroyed').length;
+      const confirmed = activeProfile && bearers.countScenario(attackerState,activeProfile,obj.phase);
+      if (confirmed?.weapons !== null && confirmed?.weapons !== undefined &&
+          obj.weaponCountOverride !== '' && obj.weaponCountOverride !== confirmed.weapons) {
+        throw Error('The entered weapon count differs from the confirmed loadout.');
+      }
       if (activeProfile && attackerState.remaining > 0 && attackerState.remaining < candidateCount &&
-          attackerState.models.every(m => m.weapons !== null) &&
+          attackerState.models.every(m => m.weapons !== null) && !attackerState.profiles.find(p => p.id === activeProfile)?.ambiguous &&
           bearers.countScenario(attackerState,activeProfile,obj.phase).weapons === null) {
         throw Error('Confirm surviving bearer groups in Quick Mode or identify the destroyed models in Advanced Mode.');
       }
@@ -394,7 +399,7 @@
     available.replaceChildren();
     const phase = fields.get('phase').control.value;
     for (const profile of unit.profiles.filter(p => p.phase === phase)) {
-      const count = bearers.countScenario(unit, profile.name, phase);
+      const count = bearers.countScenario(unit, profile.id || profile.name, phase);
       let attacks = '—';
       if (count.weapons !== null) {
         try {
@@ -452,7 +457,8 @@
     const result = activeProfile ? bearers.countScenario(attackerState, activeProfile, fields.get('phase').control.value) : null;
     fill({ models: result ? '' : attackerState.remaining, copies: 1,
       weaponCountOverride: result?.weapons ?? (attackerState.remaining === 0 ? 0 : '') });
-    $('equipment').textContent = result?.issue || (result ? result.weapons + ' surviving weapons for ' + activeProfile : '');
+    const missing = attackerState.models.flatMap((model,i) => model.status !== 'destroyed' && !model.weapons ? [i+1] : []);
+    $('equipment').textContent = result?.issue ? result.issue + (missing.length ? ' Missing equipment for models ' + missing.join(', ') + '.' : '') : (result ? result.weapons + ' surviving weapons for ' + (attackerState.profiles.find(p => p.id === activeProfile)?.name || activeProfile) : '');
   }
 
   function updateStrength(redrawModels,keepQuickInputs) {
@@ -502,18 +508,23 @@
         entries.push({unit:other,profile:unitProfile(record.roster.faction,other.name)});
       }
     }
-    const profiles = [...new Set(entries.flatMap(entry => (entry.profile?.weapons || []).map(w => JSON.stringify(w))))].map(JSON.parse);
-    const distinct = new Set(profiles.map(w => w.name)).size === profiles.length;
-    // The existing roster schema identifies weapons by name. Keep differing same-name profiles manual.
-    const weaponProfiles = distinct ? profiles : record?.profile?.weapons || [];
-    const descriptors = weaponProfiles.map(w => ({name:w.name, phase:engine.weaponPhase(w), attacks:w.a,
-      extra:(w.keywords || []).some(k => engine.keyword(k).name === 'Extra Attacks')}));
+    const weaponProfiles = entries.flatMap(({unit,profile}) => {
+      const source = unit.id || unit.name;
+      const unique = [...new Set((profile?.weapons || []).map(w => JSON.stringify(w)))].map(JSON.parse);
+      return unique.map(w => ({
+        ...w, source, sourceName:unit.name, id: JSON.stringify([source,w]),
+        ambiguous: unique.filter(other => other.name === w.name).length > 1,
+      }));
+    });
+    const descriptors = weaponProfiles.map(w => ({name:w.name,id:w.id,source:w.source,ambiguous:w.ambiguous,
+      phase:engine.weaponPhase(w), attacks:w.a, extra:(w.keywords || []).some(k => engine.keyword(k).name === 'Extra Attacks')}));
     attackerState = null;
-    for (const {unit,profile} of distinct ? entries : entries.slice(0,1)) {
+    for (const {unit,profile} of entries) {
       const part = bearers.scenarioUnit(unit,descriptors);
       if (!part) continue;
       const stats = profile?.stats;
       for (const model of part.models) {
+        model.source = unit.id || unit.name;
         model.type = stats?.length === 1 ? stats[0].name || unit.name : unit.name;
         model.maxWounds = stats?.length === 1 ? Number(stats[0].w) || null : null;
       }
@@ -551,7 +562,7 @@
     const selectedWeapon = $('weapon').value;
     const gear = new Set((sourceUnit?.unit.wargear || []).map(w => clean(typeof w === 'string' ? w : w.item)));
     const weapons = attackerState?.weaponProfiles || sourceUnit?.profile?.weapons || [];
-    const rows = weapons.flatMap((w, i) => engine.weaponPhase(w) === phase ? [[String(i), w.name + (gear.has(clean(w.name)) ? ' · selected wargear' : '')]] : []);
+    const rows = weapons.flatMap((w, i) => engine.weaponPhase(w) === phase ? [[String(i), w.name + (w.sourceName && weapons.some(other => other !== w && other.name === w.name) ? ' · ' + w.sourceName : '') + (gear.has(clean(w.name)) ? ' · selected wargear' : '')]] : []);
     const chosen = desired ? weapons.findIndex(w => engine.weaponPhase(w) === phase && clean(w.name) === clean(desired)) : -1;
     const defaultWeapon = rows.find(([i]) => gear.has(clean(weapons[i].name)));
     options($('weapon'), 'Manual weapon profile', rows, chosen >= 0 ? String(chosen) :
@@ -564,7 +575,7 @@
     if ($('weapon').value === '' || !weapon) { originalKeywords = []; activeProfile = ''; fill({ weaponCountOverride: '' }); syncWeaponCount(); return; }
     const num = text => /^-?\d+/.test(String(text)) ? Number(String(text).match(/^-?\d+/)[0]) : '';
     const range = num(weapon.range);
-    activeProfile = weapon.name;
+    activeProfile = weapon.id || weapon.name;
     syncWeaponCount();
     drawStrength(false);
     fill({ attacks: weapon.a, skill: weapon.skill === '-' ? '-' : num(weapon.skill),
@@ -607,11 +618,33 @@
   function plans() {
     captureTarget();
     if (!queue.length) return [{ slot: targetSlot, label: 'Current weapon', plan: engine.compile(attackConfig()) }];
+    if (!roll && queue.some(outdated)) throw Error('Review outdated queued attacks before starting a new calculation.');
     return queue.map(({ slot, config, label }) => ({
       slot, label, plan: engine.compile({ ...config, ...targets[slot] }),
     }));
   }
-  function resetRoll() { roll = null; rollQueue = []; liveStates = {}; completedRolls = []; }
+  let archivedRolls = [];
+  function resetRoll(clearHistory = false) {
+    if (clearHistory) archivedRolls = [];
+    else {
+      archivedRolls.push(...completedRolls);
+      if (roll && !roll.action && rollQueue[rollIndex]) {
+        const previous = rollQueue[rollIndex];
+        archivedRolls.push({label:previous.label + ' → target ' + previous.slot, history:[...roll.history]});
+      }
+    }
+    roll = null; rollQueue = []; liveStates = {}; completedRolls = [];
+  }
+  function currentSnapshot(entry) {
+    const state = attackerState;
+    if (!state || !entry.profile || entry.attacker !== state.id) return null;
+    return JSON.stringify({remaining:state.remaining,models:state.models,survivors:state.survivors,
+      config: entry.profile === activeProfile ? read() : entry.config});
+  }
+  function outdated(entry) {
+    const snapshot = currentSnapshot(entry);
+    return snapshot !== null && entry.snapshot != null && entry.snapshot !== snapshot && entry.accepted !== snapshot;
+  }
   const fmt = value => Number.isFinite(value) ? value.toFixed(2) : '—';
   const pct = value => Number.isFinite(value) ? (value * 100).toFixed(2) + '%' : '—';
   const threshold = (value, fallback = 'Impossible') => value > 6 ? fallback : value + '+';
@@ -659,6 +692,7 @@
       }
       panel.append(el('p', result.method));
       stat(panel, [
+        ['Target models before combat', group[0].plan.models], ['Expected target models remaining', fmt(group[0].plan.models - result.expectedKills)],
         ['Destroy target', pct(result.destroyed)], ['Expected wounds lost', fmt(result.appliedDamage)],
         ['Expected models destroyed', fmt(result.expectedKills)], ['Expected wounds remaining', fmt(result.remaining)],
       ]);
@@ -670,7 +704,7 @@
         detail.open = summaries.length === 1;
         detail.append(el('summary', label + ' · attack sequence'));
         stat(detail, [
-          ['Attacks', fmt(stats.attacks)], ['Hits · ' + (plan.torrent ? 'automatic' : threshold(plan.hitNeeded)), fmt(stats.hits)],
+          ['Weapons available', plan.weaponCount], ['Attacks', fmt(stats.attacks)], ['Hits · ' + (plan.torrent ? 'automatic' : threshold(plan.hitNeeded)), fmt(stats.hits)],
           ['Critical hits', fmt(stats.criticalHits)], ['Wounds · ' + threshold(plan.woundNeeded), fmt(stats.wounds)],
           ['Critical wounds', fmt(stats.criticalWounds)],
           ['Failed saves · ' + (plan.groups.length ? 'per group' : threshold(plan.save, 'No save')), fmt(stats.failedSaves)],
@@ -693,7 +727,32 @@
     for (const [index, entry] of queue.entries()) {
       const line = el('div', null, 'combat-actions');
       line.append(el('span', (index + 1) + '. ' + entry.label + ' → target ' + entry.slot));
-      const remove = el('button', 'Remove');
+      const stale = outdated(entry);
+      if (stale) {
+        line.append(el('strong','Outdated'));
+        const recalculate = el('button','Recalculate Pending Attack');
+        recalculate.disabled = entry.profile !== activeProfile;
+        recalculate.onclick = () => {
+          try {
+            const config = attackConfig();
+            engine.compile(config);
+            const counted = bearers.countScenario(attackerState,activeProfile,config.phase);
+            const slots = counted.weapons === config.weaponCountOverride ? counted.slots : null;
+            if (config.phase === 'melee' && !config.split && !config.keywords.some(k => k.name === 'Extra Attacks') &&
+                queue.some(other => other !== entry && other.attacker === entry.attacker && other.config.phase === 'melee' &&
+                  !other.config.split && !other.config.keywords.some(k => k.name === 'Extra Attacks') &&
+                  (!slots || !other.slots || other.slots.some(slot => slots.includes(slot))))) {
+              throw Error('Remove overlapping standard melee attacks before recalculating.');
+            }
+            entry.config = config; entry.slots = slots; entry.snapshot = currentSnapshot(entry);
+            resetRoll(); render();
+          } catch (error) { $('error').textContent = error.message; }
+        };
+        const keep = el('button','Keep Original Snapshot');
+        keep.onclick = () => { entry.accepted = currentSnapshot(entry); render(); };
+        line.append(recalculate,keep);
+      }
+      const remove = el('button', stale ? 'Remove Outdated Attack' : 'Remove');
       remove.onclick = () => { queue.splice(index, 1); resetRoll(); render(); };
       line.append(remove);
       $('queue').append(line);
@@ -747,7 +806,7 @@
     const history = el('details');
     history.open = true;
     history.append(el('summary', 'Roll history'));
-    const rows = [...completedRolls.flatMap(item => [item.label, ...item.history.map(formatRoll)]),
+    const rows = [...[...archivedRolls,...completedRolls].flatMap(item => [item.label, ...item.history.map(formatRoll)]),
       ...roll.history.map(formatRoll)];
     for (const row of rows) history.append(el('p', row));
     parent.append(history);
@@ -790,7 +849,7 @@
     $('equipment').textContent = '';
     $('name').value = '';
     setConfig(example());
-    resetRoll();
+    resetRoll(true);
     renderContext();
     render();
   }
@@ -838,7 +897,8 @@
         (!slots || !e.slots || e.slots.some(slot => slots.includes(slot))))) {
         throw Error('Each model may queue one standard melee profile. Confirm distinct bearers or manually allocate split attacks.');
       }
-      queue.push({ config, attacker, slots, slot: targetSlot, label: weapon?.value ? weapon.textContent : 'Manual ' + (config.phase === 'melee' ? 'melee' : 'ranged') + ' weapon' });
+      const entry = { config, attacker, slots, profile:activeProfile, slot: targetSlot, label: weapon?.value ? weapon.textContent : 'Manual ' + (config.phase === 'melee' ? 'melee' : 'ranged') + ' weapon' };
+      entry.snapshot = currentSnapshot(entry); queue.push(entry);
       resetRoll(); render();
     },
     clear() { queue = []; resetRoll(); render(); },
@@ -879,7 +939,7 @@
         const phase = entry.scenario.config.phase;
         const profiles = attackerState.weaponProfiles;
         const rows = profiles.flatMap((w,i) => engine.weaponPhase(w) === phase ? [[String(i),w.name]] : []);
-        const index = profiles.findIndex(w => w.name === activeProfile && engine.weaponPhase(w) === phase);
+        const index = profiles.findIndex(w => (w.id || w.name) === activeProfile && engine.weaponPhase(w) === phase);
         options($('weapon'),'Manual weapon profile',rows,index < 0 ? '' : String(index));
         if (index >= 0) originalKeywords = (profiles[index].keywords || []).map(engine.keyword);
       }
