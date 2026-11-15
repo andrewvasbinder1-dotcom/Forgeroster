@@ -534,7 +534,7 @@
     const result = summarize(initial, state, {}, 'Monte Carlo · ' + samples + ' samples · seed ' + seed);
     return { ...result, casualties, expectedKills: mean(casualties) };
   }
-  const api = { source, definitions, example, keyword, weaponPhase, woundThreshold, pmf, compile, calculate, live, simulate, seededDie };
+  const api = { revision: '11e-combat-1', source, definitions, example, keyword, weaponPhase, woundThreshold, pmf, compile, calculate, live, simulate, seededDie };
   if (typeof module === 'object') module.exports = api;
   else window.ForgeRosterCombat = api;
 })();

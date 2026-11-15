@@ -1,14 +1,14 @@
 'use strict';
 
-const cacheName = 'forgeroster-shell-v15';
+const cacheName = 'forgeroster-shell-v16';
 const root = new URL(self.registration.scope);
 const shell = [
-  './', './index.html', './app.css?v=20261114.15', './app.js?v=20261114.15', './manifest.webmanifest?v=20261114.15',
-  './icons/icon-192.png', './icons/icon-512.png', './factions.js?v=20261114.15', './setup.js?v=20261114.15',
-  './roster-storage.js?v=20261114.15', './validation.js?v=20261114.15', './army-setup.js?v=20261114.15', './weapon-bearers.js?v=20261114.15', './rules-builder.js?v=20261114.15', './rules-library.js?v=20261114.15', './rule-links.js?v=20261114.15',
-  './source-manager.js?v=20261114.15', './auth-config.js?v=20261114.15', './cloud.js?v=20261114.15', './auth.js?v=20261114.15',
-  './combat.css?v=20261114.15', './combat-engine.js?v=20261114.15', './combat.js?v=20261114.15', './keyword-reference.js?v=20261114.15',
-  './production.css?v=20261114.15', './operations.js?v=20261114.15', './brand/crest.svg', './icons/apple-touch.png', './icons/maskable-512.png',
+  './', './index.html', './app.css?v=20261114.16', './app.js?v=20261114.16', './manifest.webmanifest?v=20261114.16',
+  './icons/icon-192.png', './icons/icon-512.png', './factions.js?v=20261114.16', './setup.js?v=20261114.16',
+  './roster-storage.js?v=20261114.16', './validation.js?v=20261114.16', './army-setup.js?v=20261114.16', './weapon-bearers.js?v=20261114.16', './rules-builder.js?v=20261114.16', './rules-library.js?v=20261114.16', './rule-links.js?v=20261114.16',
+  './source-manager.js?v=20261114.16', './auth-config.js?v=20261114.16', './cloud.js?v=20261114.16', './auth.js?v=20261114.16',
+  './combat.css?v=20261114.16', './combat-engine.js?v=20261114.16', './combat.js?v=20261114.16', './keyword-reference.js?v=20261114.16',
+  './production.css?v=20261114.16', './operations.js?v=20261114.16', './brand/crest.svg', './icons/apple-touch.png', './icons/maskable-512.png',
   './data/mfm.json', './data/rules/bundled.json',
 ];
 const shellUrls = new Set(shell.map(path => new URL(path, root).href));

@@ -44,6 +44,7 @@
   let installed = [];
   let bundled = [];
   let loadError = '';
+  let keywordFaction = '';
   const normalize = value => String(value ?? '').normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
   const validString = (value, limit) => typeof value === 'string' && value.length <= limit;
   const validName = (value, limit) => validString(value, limit) && Boolean(value.trim());
@@ -211,19 +212,46 @@
       category.append(new Option('All keyword categories', ''));
       const entries = window.ForgeRosterKeywords.entries;
       for (const name of new Set(entries.map(entry => entry.category))) category.append(new Option(name, name));
+      const factionControl = element('div');
       const matches = element('div');
+      let factionRecords;
+      let visibleLimit = 80;
+      window.ForgeRosterKeywords.factionPicker('Keyword faction', (records, faction) => {
+        keywordFaction = faction;
+        factionRecords = records;
+        visibleLimit = 80;
+        drawKeywords();
+      }).then(picker => {
+        if (!factionControl.isConnected) return;
+        factionControl.append(picker);
+        if (keywordFaction) { picker.value = keywordFaction; picker.onchange(); }
+      })
+        .catch(error => { factionControl.textContent = error.message; });
       const drawKeywords = () => {
         matches.replaceChildren();
-        for (const entry of entries) {
+        const candidates = factionRecords || entries;
+        const categories = [...new Set(candidates.map(entry => entry.category))];
+        const previousCategory = category.value;
+        category.replaceChildren(new Option('All keyword categories',''));
+        for (const name of categories) category.append(new Option(name,name));
+        if (categories.includes(previousCategory)) category.value = previousCategory;
+        let count = 0;
+        for (const entry of candidates) {
           if (category.value && entry.category !== category.value) continue;
           if (query && !normalize(entry.name).includes(query)) continue;
-          matches.append(window.ForgeRosterKeywords.chip(entry.name));
+          if (count++ >= visibleLimit) continue;
+          matches.append(window.ForgeRosterKeywords.chip(entry.name, entry));
+        }
+        if (count > visibleLimit) {
+          const more = element('button', 'Show more keywords');
+          more.onclick = () => { visibleLimit += 80; drawKeywords(); };
+          matches.append(more);
         }
         if (!matches.childElementCount) matches.append(element('p', 'No matching reference definitions.'));
       };
       category.onchange = drawKeywords;
       drawKeywords();
-      keywordList.append(category, matches);
+      keywordList.append(factionControl, category, matches);
       results.append(keywordList);
     }
     if (!query && !scope) {

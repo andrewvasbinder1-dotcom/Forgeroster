@@ -24,9 +24,9 @@ test('offline navigation preserves the installed shell and mismatched asset revi
     match: async key => { lookedUp.push(key); return new Response('installed'); },
   } });
   assert.equal(await (await handle('?release=other','navigate')).text(),'installed');
-  assert.equal(await (await handle('combat.js?v=20261114.15','same-origin')).text(),'installed');
+  assert.equal(await (await handle('combat.js?v=20261114.16','same-origin')).text(),'installed');
   assert.equal(handle('combat.js?v=another-release','same-origin'),undefined);
-  assert.deepEqual(lookedUp,['https://example.test/Forgeroster/','https://example.test/Forgeroster/combat.js?v=20261114.15']);
+  assert.deepEqual(lookedUp,['https://example.test/Forgeroster/','https://example.test/Forgeroster/combat.js?v=20261114.16']);
 });
 
 test('cache quota errors preserve the network response and online navigation leaves the installed shell intact', async () => {
@@ -34,7 +34,7 @@ test('cache quota errors preserve the network response and online navigation lea
   const handle = worker({ network: async () => new Response('network'), cache: {
     put: async () => { writes++; throw Error('quota'); },
   } });
-  assert.equal(await (await handle('combat.js?v=20261114.15','same-origin')).text(),'network');
+  assert.equal(await (await handle('combat.js?v=20261114.16','same-origin')).text(),'network');
   assert.equal(await (await handle('','navigate')).text(),'network');
   assert.equal(writes,1);
 });

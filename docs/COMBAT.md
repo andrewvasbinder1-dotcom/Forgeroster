@@ -101,3 +101,7 @@ The keyword dialog links to the June 2026 11th-edition Core Rules PDF. Its expla
 The calculator builds keyword activity from the same compiled attack it uses for probability and live rolls. The state describes the current attack at the time the popup opens. Resolve timing- and roll-dependent effects during play. An attack with no eligible weapons or a targeting error cannot activate those weapon effects.
 
 New saved scenarios record the keyword reference revision. The release bundles only one reference revision. A future update that changes mechanics needs archived version dispatch before old scenarios can be replayed under their original mechanics.
+
+Faction filtering indexes the packaged catalogue and installed rules packs. The administration screen lists missing keyword definitions by faction. This list is generated from public catalogue data and does not persist triage state. The catalogue can identify a term and its source without establishing a verified mechanical definition.
+
+New combat scenarios pin both the reference and calculator revision. Untagged and partially tagged saves are labeled legacy. The calculator refuses to replay a pinned revision it cannot load. Only one engine revision is installed in this release.

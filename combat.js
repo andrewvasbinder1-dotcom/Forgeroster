@@ -933,7 +933,7 @@
     const name = $('name').value.trim();
     if (!name) throw Error('Enter a scenario name.');
     captureTarget();
-    const scenario = { schemaVersion: 1, keywordReferenceRevision: window.ForgeRosterKeywords.revision, config: read(), queue: clone(queue), targets: clone(targets), targetSlot, attackerState: clone(attackerState), activeProfile, casualtyMode };
+    const scenario = { schemaVersion: 1, keywordReferenceRevision: window.ForgeRosterKeywords.revision, combatEngineRevision: engine.revision, config: read(), queue: clone(queue), targets: clone(targets), targetSlot, attackerState: clone(attackerState), activeProfile, casualtyMode };
     scenario.rollHistory = resolvedHistoryRows().slice(-60).map(row => row.length > 240 ? row.slice(0, 239) + '…' : row);
     const state = account;
     if (state) {
@@ -1003,7 +1003,14 @@
     load() {
       const entry = scenarios().find(x => x.id === $('scenarios').value);
       if (entry?.scenario?.schemaVersion !== 1) return;
+      const replay = window.ForgeRosterKeywords.replayStatus(entry.scenario, engine.revision);
+      if (replay === 'unavailable') {
+        status('This saved scenario requires a rules revision that is not installed.');
+        return;
+      }
       clearScenario();
+      status(replay === 'legacy' ? 'Legacy scenario · Recalculating with the installed rules revision.' :
+        'Loaded with its saved rules revision.');
       $('name').value = entry.name;
       savedRollRows = Array.isArray(entry.scenario.rollHistory)
         ? entry.scenario.rollHistory.filter(row => typeof row === 'string').slice(-60) : [];

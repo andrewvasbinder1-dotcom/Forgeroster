@@ -51,3 +51,24 @@ test('conditional effects distinguish inactive, active and blocked combinations'
   assert.equal(plan({keywords:['Torrent','Precision']}).keywordActivity.Torrent, 'unavailable');
   assert.equal(plan({keywords:['Hazardous'],weaponCountOverride:0}).keywordActivity.Hazardous, 'unavailable');
 });
+
+test('faction index keeps existing scoped summaries and missing definitions separate', () => {
+  const catalogue = require('../data/mfm.json');
+  const packs = require('../data/rules/bundled.json').packs;
+  const index = reference.factionIndex(catalogue, packs);
+  assert.equal(index.size, catalogue.factions.length);
+  const votann = index.get('Leagues of Votann');
+  const efficiency = votann.find(record => record.name === 'Prioritised Efficiency' && record.category === 'Faction rule');
+  assert.ok(efficiency.summary.text.length > 0);
+  assert.match(efficiency.source, /^https:\/\/www\.warhammer-community\.com\//);
+  assert.ok(votann.some(record => record.category === 'Detachment'));
+  assert.ok(votann.some(record => record.name === 'Hearthkyn Warriors' && !record.summary));
+});
+
+test('scenario replay refuses unknown rule revisions and labels legacy scenarios', () => {
+  const pinned = {keywordReferenceRevision: reference.revision, combatEngineRevision: engine.revision};
+  assert.equal(reference.replayStatus(pinned, engine.revision), 'pinned');
+  assert.equal(reference.replayStatus({}, engine.revision), 'legacy');
+  assert.equal(reference.replayStatus({...pinned, combatEngineRevision:'older-engine'}, engine.revision), 'unavailable');
+  assert.equal(reference.replayStatus({...pinned, keywordReferenceRevision:'older-reference'}, engine.revision), 'unavailable');
+});

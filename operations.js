@@ -51,6 +51,8 @@
         <h3>Account directory</h3><p>Account UUIDs, sign-in dates, roster counts and roles.</p><label>Find by UUID<input id="frAdminUser" type="search" maxlength="36"></label>
         <button id="frAdminFindUsers">Load accounts</button><div id="frAdminUsers" role="status"></div>
         <h3>Audit log</h3><button id="frAdminLoadAudit">Load recent audit records</button><div id="frAdminAudit" role="status"></div>
+        <h3>Keyword review queue</h3><p>Missing definitions found in the installed catalogue and rules packs.</p>
+        <button id="frAdminKeywordLoad">Load keyword review queue</button><div id="frAdminKeywordQueue"></div>
         <h3>Rules and points</h3><p><a href="./data/verification.json">View points provenance and verification status</a></p>
       </div>
     </section>`;
@@ -73,6 +75,7 @@
     $('frAdminStats').replaceChildren();
     $('frAdminUsers').replaceChildren();
     $('frAdminAudit').replaceChildren();
+    $('frAdminKeywordQueue').replaceChildren();
     $('frAdminUser').value = '';
     $('frBugStatus').textContent = '';
     $('frBugForm').reset();
@@ -235,6 +238,35 @@
     row => [row.id, row.role, row.status, row.created_at, row.last_sign_in_at || 'Never signed in', row.rosters + ' rosters'].join(' · '));
   $('frAdminLoadAudit').onclick = () => adminRows('frAdminAudit','fr_admin_audit',{},
     row => [row.created_at, row.action, row.resource, row.actor || 'Unavailable', JSON.stringify(row.detail)].join(' · '));
+  $('frAdminKeywordLoad').onclick = async () => {
+    const actor = session;
+    const output = $('frAdminKeywordQueue');
+    output.textContent = 'Loading catalogue…';
+    try {
+      const access = await actor?.client.rpc('fr_admin_access');
+      if (actor !== session) return;
+      if (!access?.data || access.error) throw Error('Administrator access is required.');
+      const refs = window.ForgeRosterKeywords;
+      const results = document.createElement('div');
+      const select = await refs.factionPicker('Review faction', (records, faction) => {
+        results.replaceChildren();
+        if (!records) return;
+        const queue = refs.reviewQueue(new Map([[faction, records]]));
+        results.append(element('p', queue.length + ' definitions to review'));
+        let shown = 0;
+        const more = element('button','Show more definitions');
+        const next = () => {
+          more.remove();
+          for (const record of queue.slice(shown, shown + 60)) results.append(refs.chip(record.name, record));
+          shown += 60;
+          if (shown < queue.length) results.append(more);
+        };
+        more.onclick = next;
+        next();
+      });
+      if (actor === session) output.replaceChildren(select, results);
+    } catch (error) { if (actor === session) output.textContent = error.message; }
+  };
   $('frAdminReload').onclick = loadAdmin;
   for (const id of ['frAdminSearch','frAdminCategory','frAdminSeverity','frAdminFilter']) $(id).oninput = renderReports;
 })();
