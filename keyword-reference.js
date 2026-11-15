@@ -103,7 +103,7 @@
         }
       }
     }
-    const categories = {'faction-rule':'Faction rule', detachment:'Detachment', ability:'Unit ability', keyword:'Unit keyword', stratagem:'Stratagem', enhancement:'Enhancement'};
+    const categories = {'faction-rule':'Faction rule', 'detachment-rule':'Detachment ability', 'leader-rule':'Attachment rule', detachment:'Detachment', ability:'Unit ability', keyword:'Unit keyword', stratagem:'Stratagem', enhancement:'Enhancement'};
     for (const pack of packs) {
       for (const item of pack.entries) {
         if (!item.faction || !categories[item.kind] || !item.text) continue;

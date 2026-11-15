@@ -1,14 +1,14 @@
 'use strict';
 
-const cacheName = 'forgeroster-shell-v16';
+const cacheName = 'forgeroster-shell-v17';
 const root = new URL(self.registration.scope);
 const shell = [
-  './', './index.html', './app.css?v=20261114.16', './app.js?v=20261114.16', './manifest.webmanifest?v=20261114.16',
-  './icons/icon-192.png', './icons/icon-512.png', './factions.js?v=20261114.16', './setup.js?v=20261114.16',
-  './roster-storage.js?v=20261114.16', './validation.js?v=20261114.16', './army-setup.js?v=20261114.16', './weapon-bearers.js?v=20261114.16', './rules-builder.js?v=20261114.16', './rules-library.js?v=20261114.16', './rule-links.js?v=20261114.16',
-  './source-manager.js?v=20261114.16', './auth-config.js?v=20261114.16', './cloud.js?v=20261114.16', './auth.js?v=20261114.16',
-  './combat.css?v=20261114.16', './combat-engine.js?v=20261114.16', './combat.js?v=20261114.16', './keyword-reference.js?v=20261114.16',
-  './production.css?v=20261114.16', './operations.js?v=20261114.16', './brand/crest.svg', './icons/apple-touch.png', './icons/maskable-512.png',
+  './', './index.html', './app.css?v=20261114.17', './app.js?v=20261114.17', './manifest.webmanifest?v=20261114.17',
+  './icons/icon-192.png', './icons/icon-512.png', './factions.js?v=20261114.17', './setup.js?v=20261114.17',
+  './roster-storage.js?v=20261114.17', './validation.js?v=20261114.17', './army-setup.js?v=20261114.17', './weapon-bearers.js?v=20261114.17', './rules-builder.js?v=20261114.17', './rules-library.js?v=20261114.17', './rule-links.js?v=20261114.17',
+  './source-manager.js?v=20261114.17', './auth-config.js?v=20261114.17', './cloud.js?v=20261114.17', './auth.js?v=20261114.17',
+  './combat.css?v=20261114.17', './combat-engine.js?v=20261114.17', './combat-engine-v1.js?v=20261114.17', './combat.js?v=20261114.17', './keyword-reference.js?v=20261114.17',
+  './production.css?v=20261114.17', './operations.js?v=20261114.17', './brand/crest.svg', './icons/apple-touch.png', './icons/maskable-512.png',
   './data/mfm.json', './data/rules/bundled.json',
 ];
 const shellUrls = new Set(shell.map(path => new URL(path, root).href));

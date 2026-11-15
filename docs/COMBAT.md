@@ -104,4 +104,4 @@ New saved scenarios record the keyword reference revision. The release bundles o
 
 Faction filtering indexes the packaged catalogue and installed rules packs. The administration screen lists missing keyword definitions by faction. This list is generated from public catalogue data and does not persist triage state. The catalogue can identify a term and its source without establishing a verified mechanical definition.
 
-New combat scenarios pin both the reference and calculator revision. Untagged and partially tagged saves are labeled legacy. The calculator refuses to replay a pinned revision it cannot load. Only one engine revision is installed in this release.
+New combat scenarios pin both the reference and calculator revision. Untagged and partially tagged saves are labeled legacy. The calculator refuses to replay a pinned revision it cannot load. The release includes both engine revisions. The archived first engine handles scenarios pinned to it. Use Load example to start a new calculation with the current engine.

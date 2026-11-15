@@ -462,6 +462,17 @@
           ]
         },
         {
+          "id": "berehk-leader",
+          "name": "Berehk Stornbröw attachment",
+          "kind": "leader-rule",
+          "faction": "Leagues of Votann",
+          "unit": "Berehk Stornbröw",
+          "text": "Berehk Stornbröw can be attached to Cthonian Beserks. Use the Core Rules for how the resulting attached unit operates.",
+          "references": [
+            "Games Workshop Faction Pack v1.2, pp. 9–10"
+          ]
+        },
+        {
           "id": "berehk-graviton",
           "name": "Kromlôk’s Revenge – graviton strikes",
           "kind": "weapon",

@@ -37,3 +37,7 @@ restorable backup. Verify the migration sequence and rollback on staging.
 After deploying, compare owner-scoped reads and writes using two real sessions;
 verify the PostgreSQL revision trigger rather than relying on client timestamps.
 The public Pages bundle does not contain these migrations and cannot apply them.
+
+## Persistent keyword triage
+
+Apply `supabase/keyword_triage.sql` after `supabase/operations.sql`. Verify in staging that administrator decisions survive a fresh login and that authenticated non-administrators cannot call either RPC. The queue remains viewable in Administration when the migration is pending, with shared decisions shown as unavailable. Marking a keyword resolved records a review decision. Publishing a mechanical definition still requires a rules-pack update.

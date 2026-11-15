@@ -72,3 +72,13 @@ test('scenario replay refuses unknown rule revisions and labels legacy scenarios
   assert.equal(reference.replayStatus({...pinned, combatEngineRevision:'older-engine'}, engine.revision), 'unavailable');
   assert.equal(reference.replayStatus({...pinned, keywordReferenceRevision:'older-reference'}, engine.revision), 'unavailable');
 });
+
+test('archived calculator retains the first revision and its activation behavior', () => {
+  const archive = require('../combat-engine-v1.js');
+  const input = {...engine.example, keywords:['Rapid Fire 0']};
+  assert.equal(archive.revision, '11e-combat-1');
+  assert.equal(engine.revision, '11e-combat-2');
+  assert.equal(archive.compile(input).keywordActivity['Rapid Fire'], 'active');
+  assert.equal(engine.compile(input).keywordActivity['Rapid Fire'], 'inactive');
+  assert.equal(archive.compile(input).attacks(4), engine.compile(input).attacks(4));
+});

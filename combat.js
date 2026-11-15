@@ -1,7 +1,8 @@
 'use strict';
 
 (() => {
-  const engine = window.ForgeRosterCombat;
+  const currentEngine = window.ForgeRosterCombat;
+  let engine = currentEngine;
   const bearers = window.ForgeRosterBearers;
   const root = document.createElement('section');
   root.id = 'frCombat';
@@ -916,6 +917,7 @@
     status('');
   }
   function clearScenario() {
+    engine = currentEngine;
     attackerState = null; activeProfile = ''; casualtyMode = 'quick'; casualtyUndo = null; drawStrength();
     sourceUnit = null; profileTarget = null; requestedEntry = null;
     queue = []; targetSlot = 'A'; targets = { A: {}, B: {} }; originalKeywords = [];
@@ -1003,14 +1005,18 @@
     load() {
       const entry = scenarios().find(x => x.id === $('scenarios').value);
       if (entry?.scenario?.schemaVersion !== 1) return;
-      const replay = window.ForgeRosterKeywords.replayStatus(entry.scenario, engine.revision);
+      const pinnedEngine = entry.scenario.combatEngineRevision;
+      const replayEngine = !pinnedEngine || pinnedEngine === currentEngine.revision
+        ? currentEngine : window.ForgeRosterCombatArchive?.[pinnedEngine];
+      const replay = window.ForgeRosterKeywords.replayStatus(entry.scenario, replayEngine?.revision);
       if (replay === 'unavailable') {
         status('This saved scenario requires a rules revision that is not installed.');
         return;
       }
       clearScenario();
+      engine = replayEngine;
       status(replay === 'legacy' ? 'Legacy scenario · Recalculating with the installed rules revision.' :
-        'Loaded with its saved rules revision.');
+        'Loaded with its saved rules revision · ' + engine.revision + '.');
       $('name').value = entry.name;
       savedRollRows = Array.isArray(entry.scenario.rollHistory)
         ? entry.scenario.rollHistory.filter(row => typeof row === 'string').slice(-60) : [];
